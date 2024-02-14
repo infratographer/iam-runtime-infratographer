@@ -3,11 +3,9 @@ FROM gcr.io/distroless/static:nonroot
 # `nonroot` coming from distroless
 USER 65532:65532
 
-# pass in name as --build-arg
-ARG NAME
+COPY iam-runtime-infratographer /bin/iam-runtime-infratographer
 
-COPY ./bin/${NAME} /app
+# Run the runtime service on container startup.
+ENTRYPOINT ["/bin/iam-runtime-infratographer"]
 
-# Run the web service on container startup.
-ENTRYPOINT ["/app"]
 CMD ["serve"]
