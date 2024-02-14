@@ -1,0 +1,8 @@
+server:
+  socketpath: /tmp/runtime.sock
+permissions:
+  host: permissions-api.hollow-a.dc10.metalkube.net
+jwt:
+  jwksuri: https://iam.metalctrl.io/jwks.json
+tracing:
+  enabled: false
