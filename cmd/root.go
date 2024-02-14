@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const appName = "iam-runtime-equinix"
+const appName = "iam-runtime-infratographer"
 
 var (
 	cfgFile   string
