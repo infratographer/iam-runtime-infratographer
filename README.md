@@ -1,6 +1,6 @@
-# iam-runtime-infratographer - An IAM runtime using the Infratographer IAM stack
+# iam-runtime-infratographer - An Infratographer IAM runtime implementation
 
-iam-runtime-infratographer is an implementation of [IAM runtime][iam-runtime] that uses [identity-api][identity-api] for authenticating subjects and [permissions-api][permissions-api] for checking access to resources. This allows applications to make use of Infratographer IAM functionality without needing to include dependencies directly in application code or mock services in development.
+iam-runtime-infratographer is an [IAM runtime][iam-runtime] implementation that uses [identity-api][identity-api] for authenticating subjects and [permissions-api][permissions-api] for checking access to resources. This allows applications to make use of Infratographer IAM functionality without needing to include dependencies directly in application code or mock services in development.
 
 [iam-runtime]: https://github.com/metal-toolbox/iam-runtime
 [identity-api]: https://github.com/infratographer/identity-api
