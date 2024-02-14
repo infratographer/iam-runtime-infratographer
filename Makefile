@@ -1,5 +1,7 @@
 ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 TOOLS_DIR := .tools
+GOOS ?= linux
+GOARCH ?= amd64
 
 GOLANGCI_LINT_REPO = github.com/golangci/golangci-lint
 GOLANGCI_LINT_VERSION = v1.56.1
@@ -16,7 +18,7 @@ lint: $(TOOLS_DIR)/golangci-lint
 	@$(TOOLS_DIR)/golangci-lint run --modules-download-mode=readonly
 
 build:
-	@CGO_ENABLED=0 go build -mod=readonly -v -o bin/${APP_NAME}
+	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod=readonly -v
 
 go-dependencies:
 	@go mod download
