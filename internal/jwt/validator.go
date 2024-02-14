@@ -18,7 +18,8 @@ type Validator interface {
 }
 
 type validator struct {
-	kf jwt.Keyfunc
+	kf     jwt.Keyfunc
+	parser *jwt.Parser
 }
 
 // NewValidator creates a validator with the given configuration.
@@ -51,15 +52,22 @@ func NewValidator(config Config) (Validator, error) {
 		return nil, err
 	}
 
+	parser := jwt.NewParser(
+		jwt.WithIssuedAt(),
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(config.Issuer),
+	)
+
 	out := &validator{
-		kf: kf.Keyfunc,
+		kf:     kf.Keyfunc,
+		parser: parser,
 	}
 
 	return out, nil
 }
 
 func (v *validator) ValidateToken(tokenString string) (map[string]string, error) {
-	tok, err := jwt.Parse(tokenString, v.kf)
+	tok, err := v.parser.Parse(tokenString, v.kf)
 	if err != nil {
 		return nil, err
 	}
