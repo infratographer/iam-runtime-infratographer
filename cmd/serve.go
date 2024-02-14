@@ -32,6 +32,10 @@ func init() {
 	jwt.AddFlags(cmdFlags)
 	permissions.AddFlags(cmdFlags)
 	server.AddFlags(cmdFlags)
+
+	if err := viper.BindPFlags(cmdFlags); err != nil {
+		panic(err)
+	}
 }
 
 func serve(_ context.Context, _ *viper.Viper, cfg config.Config) error {

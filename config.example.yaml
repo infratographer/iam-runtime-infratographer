@@ -3,6 +3,7 @@ server:
 permissions:
   host: permissions-api.enterprise.dev
 jwt:
-  jwksuri: https://iam.enterprise.dev/jwks.json
+  jwksuri: https://identity-api.enterprise.dev/jwks.json
+  issuer: https://identity-api.enterprise.dev/
 tracing:
   enabled: false
