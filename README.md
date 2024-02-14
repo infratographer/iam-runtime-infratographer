@@ -13,8 +13,8 @@ iam-runtime-infratographer can be run as a standalone binary or a sidecar in a K
 To run it as a standalone binary using the provided example config, use the following commands:
 
 ```
-$ go build -mod=readonly -o bin/ .
-$ ./bin/iam-runtime-infratographer serve --config config.example.yaml
+$ make build # macOS users may need to run "GOOS=darwin make build"
+$ ./iam-runtime-infratographer serve --config config.example.yaml
 ```
 
 ## Configuration
