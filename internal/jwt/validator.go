@@ -14,7 +14,7 @@ import (
 type Validator interface {
 	// ValidateToken checks that the given token is valid (i.e., is well-formed with a valid
 	// signature and future expiry). On success, it returns a map of claims describing the subject.
-	ValidateToken(string) (map[string]string, error)
+	ValidateToken(string) (string, map[string]any, error)
 }
 
 type validator struct {
@@ -66,26 +66,18 @@ func NewValidator(config Config) (Validator, error) {
 	return out, nil
 }
 
-func (v *validator) ValidateToken(tokenString string) (map[string]string, error) {
-	tok, err := v.parser.Parse(tokenString, v.kf)
+func (v *validator) ValidateToken(tokenString string) (string, map[string]any, error) {
+	mapClaims := jwt.MapClaims{}
+
+	_, err := v.parser.ParseWithClaims(tokenString, mapClaims, v.kf)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	iss, err := tok.Claims.GetIssuer()
+	sub, err := mapClaims.GetSubject()
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	sub, err := tok.Claims.GetSubject()
-	if err != nil {
-		return nil, err
-	}
-
-	out := map[string]string{
-		"iss": iss,
-		"sub": sub,
-	}
-
-	return out, nil
+	return sub, mapClaims, nil
 }
