@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // Server represents an IAM runtime server.
@@ -86,14 +87,27 @@ func (s *server) Stop() {
 	s.grpcSrv.GracefulStop()
 }
 
-func (s *server) AuthenticateSubject(_ context.Context, req *authentication.AuthenticateSubjectRequest) (*authentication.AuthenticateSubjectResponse, error) {
-	subjClaims, err := s.validator.ValidateToken(req.Credential)
+func (s *server) ValidateCredential(_ context.Context, req *authentication.ValidateCredentialRequest) (*authentication.ValidateCredentialResponse, error) {
+	sub, claims, err := s.validator.ValidateToken(req.Credential)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, err.Error())
+		resp := &authentication.ValidateCredentialResponse{
+			Result: authentication.ValidateCredentialResponse_RESULT_INVALID,
+		}
+
+		return resp, nil
 	}
 
-	resp := &authentication.AuthenticateSubjectResponse{
-		SubjectClaims: subjClaims,
+	claimsStruct, err := structpb.NewStruct(claims)
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+	}
+
+	resp := &authentication.ValidateCredentialResponse{
+		Result: authentication.ValidateCredentialResponse_RESULT_VALID,
+		Subject: &authentication.Subject{
+			SubjectId: sub,
+			Claims:    claimsStruct,
+		},
 	}
 
 	return resp, nil
@@ -116,11 +130,19 @@ func (s *server) CheckAccess(ctx context.Context, req *authorization.CheckAccess
 
 	switch {
 	case err == nil:
-		return &authorization.CheckAccessResponse{}, nil
+		out := &authorization.CheckAccessResponse{
+			Result: authorization.CheckAccessResponse_RESULT_ALLOWED,
+		}
+
+		return out, nil
 	case errors.Is(err, permissions.ErrUnauthenticated):
-		return nil, status.Errorf(codes.Unauthenticated, err.Error())
+		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	case errors.Is(err, permissions.ErrPermissionDenied):
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+		out := &authorization.CheckAccessResponse{
+			Result: authorization.CheckAccessResponse_RESULT_DENIED,
+		}
+
+		return out, nil
 	default:
 		return nil, status.Errorf(codes.Unavailable, err.Error())
 	}
