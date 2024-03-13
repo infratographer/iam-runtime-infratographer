@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	github.com/MicahParks/jwkset v0.5.4
 	github.com/MicahParks/keyfunc/v3 v3.1.1
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/metal-toolbox/iam-runtime v0.3.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
