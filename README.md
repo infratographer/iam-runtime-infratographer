@@ -1,6 +1,6 @@
 # iam-runtime-infratographer - An Infratographer IAM runtime implementation
 
-iam-runtime-infratographer is an [IAM runtime][iam-runtime] implementation that uses [identity-api][identity-api] for authenticating subjects and [permissions-api][permissions-api] for checking access to resources. This allows applications to make use of Infratographer IAM functionality without needing to include dependencies directly in application code or mock services in development.
+iam-runtime-infratographer is an [IAM runtime][iam-runtime] implementation that uses [identity-api][identity-api] for authenticating subjects and [permissions-api][permissions-api] for checking access to resources and managing relationships. This allows applications to make use of Infratographer IAM functionality without needing to include dependencies directly in application code or mock services in development.
 
 [iam-runtime]: https://github.com/metal-toolbox/iam-runtime
 [identity-api]: https://github.com/infratographer/identity-api
@@ -36,9 +36,19 @@ data:
     server:
       socketpath: /var/iam-runtime/runtime.sock
     permissions:
-      host: permissions-api.internal.enterprise.net
+      host: permissions-api.internal.example.net
     jwt:
       jwksuri: https://iam.example.com/jwks.json
+      issuer: https://iam.example.com/
+    events:
+      nats:
+        url: nats://nats:4222
+        credsFile: /etc/nats/nats.creds
+        publishTopic: myapp
+    tracing:
+      enabled: true
+      url: app-collector:4317
+      insecure: true
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -61,7 +71,7 @@ spec:
               - name: iam-runtime-socket
                 mountPath: /var/iam-runtime/
         - name: iam-runtime
-            image: ghcr.io/infratographer/iam-runtime-infratographer:v0.1.0
+            image: ghcr.io/infratographer/iam-runtime-infratographer:v0.3.0
             volumeMounts:
               - name: iam-runtime-config
                 mountPath: /etc/iam-runtime-infratographer/
