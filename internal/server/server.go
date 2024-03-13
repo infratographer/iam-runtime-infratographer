@@ -204,7 +204,7 @@ func (s *server) publishRelationships(ctx context.Context, action events.AuthRel
 		return err
 	}
 
-	if authResp.Error() != nil {
+	if err := authResp.Error(); err != nil {
 		return err
 	}
 
