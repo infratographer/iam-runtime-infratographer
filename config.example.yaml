@@ -7,7 +7,7 @@ jwt:
   issuer: https://identity-api.enterprise.dev/
 events:
   nats:
-    url: localhost:4222
+    url: nats://localhost:4222
     credsFile: /tmp/nats.creds
     publishTopic: myapp
 tracing:
