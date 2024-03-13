@@ -6,6 +6,7 @@ import (
 	"os/signal"
 
 	"go.infratographer.com/iam-runtime-infratographer/internal/config"
+	"go.infratographer.com/iam-runtime-infratographer/internal/eventsx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"go.infratographer.com/iam-runtime-infratographer/internal/otelx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/permissions"
@@ -31,6 +32,7 @@ func init() {
 	otelx.AddFlags(cmdFlags)
 	jwt.AddFlags(cmdFlags)
 	permissions.AddFlags(cmdFlags)
+	eventsx.AddFlags(cmdFlags)
 	server.AddFlags(cmdFlags)
 
 	if err := viper.BindPFlags(cmdFlags); err != nil {
@@ -57,7 +59,12 @@ func serve(_ context.Context, _ *viper.Viper, cfg config.Config) error {
 		logger.Fatalw("failed to create permissions-api client", "error", err)
 	}
 
-	iamSrv, err := server.NewServer(cfg.Server, validator, permClient, logger)
+	publisher, err := eventsx.NewPublisher(cfg.Events)
+	if err != nil {
+		logger.Fatalw("failed to create events publisher", "error", err)
+	}
+
+	iamSrv, err := server.NewServer(cfg.Server, validator, permClient, publisher, logger)
 	if err != nil {
 		logger.Fatalw("failed to create server", "error", err)
 	}

@@ -5,5 +5,10 @@ permissions:
 jwt:
   jwksuri: https://identity-api.enterprise.dev/jwks.json
   issuer: https://identity-api.enterprise.dev/
+events:
+  nats:
+    url: nats://localhost:4222
+    credsFile: /tmp/nats.creds
+    publishTopic: myapp
 tracing:
   enabled: false
