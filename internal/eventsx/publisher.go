@@ -23,6 +23,10 @@ func (p publisher) PublishAuthRelationshipRequest(ctx context.Context, message e
 
 // NewPublisher creates a new events publisher from the given config.
 func NewPublisher(cfg Config) (Publisher, error) {
+	if !cfg.Enabled {
+		return nil, nil
+	}
+
 	natsCfg := events.NATSConfig{
 		URL:           cfg.NATS.URL,
 		PublishPrefix: cfg.NATS.PublishPrefix,
