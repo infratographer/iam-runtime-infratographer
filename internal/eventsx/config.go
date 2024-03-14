@@ -4,7 +4,8 @@ import "github.com/spf13/pflag"
 
 // Config represents a configuration for events.
 type Config struct {
-	NATS NATSConfig `mapstructure:"nats"`
+	Enabled bool       `mapstructure:"enabled"`
+	NATS    NATSConfig `mapstructure:"nats"`
 }
 
 // NATSConfig represents NATS-specific configuration for events.
@@ -18,6 +19,7 @@ type NATSConfig struct {
 
 // AddFlags sets the command line flags for publishing events.
 func AddFlags(flags *pflag.FlagSet) {
+	flags.Bool("events.enabled", false, "enable NATS event-based functions")
 	flags.String("events.nats.url", "", "NATS server URL to use")
 	flags.String("events.nats.publishprefix", "", "NATS publish prefix to use")
 	flags.String("events.nats.publishtopic", "", "NATS publish topic to use")

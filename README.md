@@ -41,6 +41,7 @@ data:
       jwksuri: https://iam.example.com/jwks.json
       issuer: https://iam.example.com/
     events:
+      enabled: true
       nats:
         url: nats://nats:4222
         credsFile: /etc/nats/nats.creds
@@ -71,7 +72,7 @@ spec:
               - name: iam-runtime-socket
                 mountPath: /var/iam-runtime/
         - name: iam-runtime
-            image: ghcr.io/infratographer/iam-runtime-infratographer:v0.3.0
+            image: ghcr.io/infratographer/iam-runtime-infratographer:v0.3.1
             volumeMounts:
               - name: iam-runtime-config
                 mountPath: /etc/iam-runtime-infratographer/
