@@ -12,3 +12,16 @@ events:
     publishTopic: myapp
 tracing:
   enabled: false
+accessToken:
+  enabled: false
+  source:
+    fileToken:
+      tokenPath: /var/run/secrets/kubernetes.io/serviceaccount/token
+    # clientCredentials:
+    #   issuer: https://identity-api.enterprise.dev/
+    #   clientID: idntcli-abc123
+    #   clientSecret: idntclisecret
+  exchange:
+    issuer: https://identity-api.enterprise.dev/
+    grantType: ""
+    tokenType: ""
