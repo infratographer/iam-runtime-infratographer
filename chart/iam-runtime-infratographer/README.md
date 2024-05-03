@@ -6,6 +6,8 @@ Functions which assist in deploying iam-runtime-infratographer with your app.
 
 ## Example deployment
 
+Helm chart repository: https://infratographer.github.io/charts
+
 ```yaml
 # file: templates/deployment.yaml
 ---
@@ -38,7 +40,7 @@ iam-runtime-infratographer:
     permissions:
       host: permissions-api.internal.example.net
     jwt:
-      jwksuri: https://iam.example.com/jwks.json
+      jwksURI: https://iam.example.com/jwks.json
       issuer: https://iam.example.com/
 ```
 
