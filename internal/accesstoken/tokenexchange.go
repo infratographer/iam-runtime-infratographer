@@ -41,7 +41,7 @@ type exchangeTokenSource struct {
 	err            error
 }
 
-// Token returns an exchanged oauth2 token from the configured issuer.
+// Token retrieves an OAuth 2.0 access token from the configured issuer using token exchange.
 // Tokens are reused as long as they are valid.
 // Upstream tokens used as the source for the exchange are reused as long as they are valid.
 func (s *exchangeTokenSource) Token() (*oauth2.Token, error) {
