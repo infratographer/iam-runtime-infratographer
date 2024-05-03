@@ -22,6 +22,10 @@ var (
 	ErrTokenEndpointMissing = errors.New("token endpoint missing from issuer well-known openid-configuration")
 )
 
+type jwksTokenEndpoint struct {
+	TokenEndpoint string `json:"token_endpoint"`
+}
+
 // FetchIssuerTokenEndpoint returns the token endpoint for the provided issuer.
 func FetchIssuerTokenEndpoint(ctx context.Context, issuer string) (string, error) {
 	uri, err := url.JoinPath(issuer, ".well-known", "openid-configuration")
@@ -40,15 +44,10 @@ func FetchIssuerTokenEndpoint(ctx context.Context, issuer string) (string, error
 	}
 	defer res.Body.Close() //nolint:errcheck // no need to check
 
-	var m map[string]interface{}
-	if err := json.NewDecoder(res.Body).Decode(&m); err != nil {
+	var jwks jwksTokenEndpoint
+	if err := json.NewDecoder(res.Body).Decode(&jwks); err != nil {
 		return "", err
 	}
 
-	tokenEndpoint, ok := m["token_endpoint"]
-	if !ok {
-		return "", ErrTokenEndpointMissing
-	}
-
-	return tokenEndpoint.(string), nil
+	return jwks.TokenEndpoint, nil
 }
