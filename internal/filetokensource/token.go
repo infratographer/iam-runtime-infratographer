@@ -36,6 +36,7 @@ func (s *TokenSource) Token() (*oauth2.Token, error) {
 
 	newToken := string(tokenb)
 
+	// Token signature is not validated here because we only need the expiry time from the claims.
 	token, _, err := jwt.NewParser().ParseUnverified(newToken, jwt.MapClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("error parsing jwt: %w", err)
