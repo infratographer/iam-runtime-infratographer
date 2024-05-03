@@ -1,0 +1,11 @@
+---
+apiVersion: v2
+appVersion: v0.0.1
+description: Functions which assist in deploying iam-runtime-infratographer with your app.
+name: iam-runtime-infratographer
+version: v0.0.1
+home: http://github.com/infratographer/iam-runtime-infratographer
+dependencies:
+  - name: common
+    version: 2.18.0
+    repository: https://charts.bitnami.com/bitnami

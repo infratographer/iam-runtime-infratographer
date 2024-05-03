@@ -1,4 +1,6 @@
 *~
 coverage.out
 iam-runtime-infratographer
+!chart/iam-runtime-infratographer/
+chart/iam-runtime-infratographer/*.tgz
 .tools/*

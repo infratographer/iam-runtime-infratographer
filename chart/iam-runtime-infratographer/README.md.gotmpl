@@ -1,0 +1,50 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" .  }}{{ template "chart.typeBadge" .  }}{{ template "chart.appVersionBadge" .  }}
+
+## Example deployment
+
+Helm chart repository: https://infratographer.github.io/charts
+
+```yaml
+# file: templates/deployment.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      annotations: {{ `{{- include "iam-runtime-infratographer.annotations" $ | nindent 8 }}` }}
+      labels:
+        app: example-app
+    spec:
+      containers:
+        - name: example-app
+          image: {{ `{{ .Values.deployment.image }}` }}
+          volumeMounts: {{ `{{- include "iam-runtime-infratographer.volumeMounts" $ | nindent 12 }}` }}
+        - {{ `{{- include "iam-runtime-infratographer.container" $ | nindent 10 }}` }}
+      volumes: {{ `{{- include "iam-runtime-infratographer.volumes" $ | nindent 8 }}` }}
+# file: values.yaml
+---
+iam-runtime-infratographer:
+  config:
+    permissions:
+      host: permissions-api.internal.example.net
+    jwt:
+      jwksURI: https://iam.example.com/jwks.json
+      issuer: https://iam.example.com/
+```
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

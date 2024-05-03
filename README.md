@@ -25,6 +25,8 @@ iam-runtime-infratographer can be configured using either a config file, command
 
 Below provides an example of adding the IAM runtime as a sidecar to your app deployment.
 
+Alternatively you could use the [helm chart](./chart/iam-runtime-infratographer/).
+
 ```yaml
 ---
 apiVersion: v1

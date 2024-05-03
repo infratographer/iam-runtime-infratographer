@@ -1,0 +1,89 @@
+---
+image:
+  # -- repository is the image repository to pull the image from
+  repository: ghcr.io/infratographer/iam-runtime-infratographer
+  # -- pullPolicy is the image pull policy for the service image
+  pullPolicy: IfNotPresent
+  # -- tag is the image tag to use. Defaults to the chart's app version
+  tag: ""
+
+config:
+  jwt:
+    # -- issuer Issuer to use for JWT validation.
+    issuer: ""
+    # -- jwksURI JWKS URI to use for JWT validation.
+    jwksURI: ""
+  permissions:
+    # -- host permissions-api host to use.
+    host: ""
+  events:
+    # -- enabled enables NATS event-based functions.
+    enabled: false
+    nats:
+      # -- url NATS server url to use.
+      url: ""
+      # -- publishPrefix NATS publish prefix to use.
+      publishPrefix: ""
+      # -- publishTopic NATS publihs topic to use.
+      publishTopic: ""
+      # -- token NATS user token to use.
+      token: ""
+      # -- credsFile path to NATS credentials file
+      credsFile: ""
+  tracing:
+    # -- enabled initializes otel tracing.
+    enabled: false
+    # -- url gRPC URL for OpenTelemetry collector.
+    url: ""
+    # -- insecure if TLS should be disabled.
+    insecure: false
+  accessToken:
+    # -- enabled configures the access token source for GetAccessToken requests.
+    enabled: false
+    source:
+      fileToken:
+        # -- tokenPath is the path to the source jwt token.
+        tokenPath: ""
+        # -- noReuseToken if enabled disables reuse of tokens while they're still valid.
+        noReuseToken: false
+      clientCredentials:
+        # -- issuer specifies the URL for the issuer for the token request.
+        # The Issuer must support OpenID discovery to discover the token endpoint.
+        issuer: ""
+        # -- clientID is the client credentials id which is used to retrieve a token from the issuer.
+        clientID: ""
+        # -- clientSecret is the client credentials secret which is used to retrieve a token from the issuer.
+        clientSecret: ""
+    exchange:
+      # -- issuer specifies the URL for the issuer for the exchanged token.
+      # The Issuer must support OpenID discovery to discover the token endpoint.
+      issuer: ""
+      # -- grantType configures the grant type
+      # @default -- urn:ietf:params:oauth:grant-type:token-exchange
+      grantType: ""
+      # -- tokenType configures the token type
+      # @default -- urn:ietf:params:oauth:token-type:jwt
+      tokenType: ""
+
+# -- restartPolicy set to Always if using with initContainers on kube 1.29 and up
+# with the SideContainer feature flag enabled.
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#sidecar-containers-and-pod-lifecycle
+restartPolicy: ""
+
+# -- volumeMounts define additional volume mounts to include with the container
+# ref: https://kubernetes.io/docs/concepts/storage/volumes/
+volumeMounts: {}
+
+# -- resource limits & requests
+# ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources: {}
+
+# -- securityContext configures the container's security context.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
