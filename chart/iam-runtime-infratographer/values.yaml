@@ -1,0 +1,16 @@
+---
+config: {}
+image:
+  # repository is the image repository to pull the image from
+  repository: ghcr.io/infratographer/iam-runtime-infratographer
+  # pullPolicy is the image pull policy for the service image
+  pullPolicy: IfNotPresent
+  # tag is the image tag to use. Defaults to the chart's app version
+  tag: ""
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
