@@ -38,7 +38,6 @@ type exchangeTokenSource struct {
 	upstreamToken  *oauth2.Token
 	exchangeConfig oauth2.Config
 	token          *oauth2.Token
-	err            error
 }
 
 // Token retrieves an OAuth 2.0 access token from the configured issuer using token exchange.
@@ -53,18 +52,12 @@ func (s *exchangeTokenSource) Token() (*oauth2.Token, error) {
 	}
 
 	if err := s.refreshUpstream(); err != nil {
-		s.err = err
-
 		return s.token, err
 	}
 
 	if err := s.exchange(); err != nil {
-		s.err = err
-
 		return s.token, err
 	}
-
-	s.err = nil
 
 	return s.token, nil
 }
@@ -73,8 +66,6 @@ func (s *exchangeTokenSource) refreshUpstream() error {
 	if s.upstreamToken == nil || !s.upstreamToken.Valid() {
 		token, err := s.upstream.Token()
 		if err != nil {
-			s.err = err
-
 			return fmt.Errorf("%w: %w", ErrUpstreamTokenRequestFailed, err)
 		}
 
