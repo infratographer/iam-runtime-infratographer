@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
 	"go.infratographer.com/iam-runtime-infratographer/internal/config"
 	"go.infratographer.com/iam-runtime-infratographer/internal/eventsx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
@@ -40,7 +41,7 @@ func init() {
 	}
 }
 
-func serve(_ context.Context, _ *viper.Viper, cfg config.Config) error {
+func serve(ctx context.Context, _ *viper.Viper, cfg config.Config) error {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
@@ -54,6 +55,11 @@ func serve(_ context.Context, _ *viper.Viper, cfg config.Config) error {
 		logger.Fatalw("failed to create validator", "error", err)
 	}
 
+	tokenSource, err := accesstoken.NewTokenSource(ctx, cfg.AccessToken)
+	if err != nil {
+		logger.Fatalw("failed to configure token source", "error", err)
+	}
+
 	permClient, err := permissions.NewClient(cfg.Permissions, logger)
 	if err != nil {
 		logger.Fatalw("failed to create permissions-api client", "error", err)
@@ -64,7 +70,7 @@ func serve(_ context.Context, _ *viper.Viper, cfg config.Config) error {
 		logger.Fatalw("failed to create events publisher", "error", err)
 	}
 
-	iamSrv, err := server.NewServer(cfg.Server, validator, permClient, publisher, logger)
+	iamSrv, err := server.NewServer(cfg.Server, validator, permClient, publisher, tokenSource, logger)
 	if err != nil {
 		logger.Fatalw("failed to create server", "error", err)
 	}

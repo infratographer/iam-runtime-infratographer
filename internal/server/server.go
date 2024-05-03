@@ -12,9 +12,11 @@ import (
 	"go.infratographer.com/iam-runtime-infratographer/internal/permissions"
 	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/gidx"
+	"golang.org/x/oauth2"
 
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/authentication"
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/authorization"
+	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/identity"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -30,31 +32,35 @@ type Server interface {
 }
 
 type server struct {
-	validator  jwt.Validator
-	permClient permissions.Client
-	publisher  eventsx.Publisher
-	logger     *zap.SugaredLogger
-	socketPath string
+	validator   jwt.Validator
+	permClient  permissions.Client
+	publisher   eventsx.Publisher
+	logger      *zap.SugaredLogger
+	socketPath  string
+	tokenSource oauth2.TokenSource
 
 	grpcSrv *grpc.Server
 
 	authentication.UnimplementedAuthenticationServer
 	authorization.UnimplementedAuthorizationServer
+	identity.UnimplementedIdentityServer
 }
 
 // NewServer creates a new runtime server.
-func NewServer(cfg Config, validator jwt.Validator, permClient permissions.Client, publisher eventsx.Publisher, logger *zap.SugaredLogger) (Server, error) {
+func NewServer(cfg Config, validator jwt.Validator, permClient permissions.Client, publisher eventsx.Publisher, tokenSource oauth2.TokenSource, logger *zap.SugaredLogger) (Server, error) {
 	out := &server{
-		validator:  validator,
-		permClient: permClient,
-		publisher:  publisher,
-		logger:     logger,
-		socketPath: cfg.SocketPath,
+		validator:   validator,
+		permClient:  permClient,
+		publisher:   publisher,
+		logger:      logger,
+		socketPath:  cfg.SocketPath,
+		tokenSource: tokenSource,
 	}
 
 	grpcSrv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
 	authorization.RegisterAuthorizationServer(grpcSrv, out)
 	authentication.RegisterAuthenticationServer(grpcSrv, out)
+	identity.RegisterIdentityServer(grpcSrv, out)
 
 	out.grpcSrv = grpcSrv
 
@@ -117,6 +123,24 @@ func (s *server) ValidateCredential(_ context.Context, req *authentication.Valid
 			SubjectId: sub,
 			Claims:    claimsStruct,
 		},
+	}
+
+	return resp, nil
+}
+
+// GetAccessToken returns a token from the configured token source.
+func (s *server) GetAccessToken(ctx context.Context, req *identity.GetAccessTokenRequest) (*identity.GetAccessTokenResponse, error) {
+	s.logger.Infow("received GetAccessToken request")
+
+	token, err := s.tokenSource.Token()
+	if err != nil {
+		s.logger.Errorw("failed to fetch token token from token source", err)
+
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resp := &identity.GetAccessTokenResponse{
+		Token: token.AccessToken,
 	}
 
 	return resp, nil

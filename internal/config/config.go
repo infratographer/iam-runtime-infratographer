@@ -1,6 +1,7 @@
 package config
 
 import (
+	"go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
 	"go.infratographer.com/iam-runtime-infratographer/internal/eventsx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"go.infratographer.com/iam-runtime-infratographer/internal/otelx"
@@ -15,4 +16,5 @@ type Config struct {
 	Events      eventsx.Config
 	Server      server.Config
 	Tracing     otelx.Config
+	AccessToken accesstoken.Config
 }
