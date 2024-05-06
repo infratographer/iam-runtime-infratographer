@@ -2,8 +2,6 @@
 
 Functions which assist in deploying iam-runtime-infratographer with your app.
 
-![Version: v0.0.1](https://img.shields.io/badge/Version-v0.0.1-informational?style=flat-square) ![AppVersion: v0.0.1](https://img.shields.io/badge/AppVersion-v0.0.1-informational?style=flat-square)
-
 ## Example deployment
 
 Helm chart repository: https://infratographer.github.io/charts
@@ -33,6 +31,8 @@ spec:
           volumeMounts: {{- include "iam-runtime-infratographer.volumeMounts" $ | nindent 12 }}
         - {{- include "iam-runtime-infratographer.container" $ | nindent 10 }}
       volumes: {{- include "iam-runtime-infratographer.volumes" $ | nindent 8 }}
+{{- include "iam-runtime-infratographer.configmap" $ }}
+
 # file: values.yaml
 ---
 iam-runtime-infratographer:
