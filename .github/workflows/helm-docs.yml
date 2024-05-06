@@ -1,25 +1,10 @@
-name: Helm lint and docs
+name: Helm docs
 on:
   push:
-  pull_request:
+    branches:
+      - main
 jobs:
-  helm-lint:
-    name: lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v3.5
-
-      - name: Run helm lint
-        run: helm lint chart/iam-runtime-infratographer
   helm-docs:
-    needs: helm-lint
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,6 +28,5 @@ jobs:
           commit_message: Helm docs updated
           commit_options: '--no-verify --signoff'
           file_pattern: 'chart/*/*.md'
-          skip_dirty_check: true
           skip_fetch: true
           skip_checkout: true

@@ -1,0 +1,20 @@
+name: Helm lint
+on:
+  push:
+  pull_request:
+jobs:
+  helm-lint:
+    name: lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3.5
+
+      - name: Run helm lint
+        run: helm lint chart/iam-runtime-infratographer
