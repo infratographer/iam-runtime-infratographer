@@ -51,8 +51,12 @@ config:
         # The Issuer must support OpenID discovery to discover the token endpoint.
         issuer: ""
         # -- clientID is the client credentials id which is used to retrieve a token from the issuer.
+        # This attribute also supports a file path by prefixing the value with `file://`.
+        # example: `file:///var/secrets/client-id`
         clientID: ""
         # -- clientSecret is the client credentials secret which is used to retrieve a token from the issuer.
+        # This attribute also supports a file path by prefixing the value with `file://`.
+        # example: `file:///var/secrets/client-secret`
         clientSecret: ""
     exchange:
       # -- issuer specifies the URL for the issuer for the exchanged token.
