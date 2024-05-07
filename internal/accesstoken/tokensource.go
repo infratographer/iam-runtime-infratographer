@@ -3,6 +3,10 @@ package accesstoken
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"golang.org/x/oauth2"
@@ -57,9 +61,34 @@ func (c ClientCredentialConfig) toTokenSource(ctx context.Context) (oauth2.Token
 		return nil, fmt.Errorf("failed to fetch issuer token endpoint: %w", err)
 	}
 
+	clientID := c.ClientID
+	clientSecret := c.ClientSecret
+
+	if uri, err := url.ParseRequestURI(clientID); err == nil && uri.Scheme == "file" {
+		file := filepath.Join(uri.Host, uri.Path)
+
+		content, err := os.ReadFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file %s: %w", file, err)
+		}
+
+		clientID = strings.TrimSpace(string(content))
+	}
+
+	if uri, err := url.ParseRequestURI(clientSecret); err == nil && uri.Scheme == "file" {
+		file := filepath.Join(uri.Host, uri.Path)
+
+		content, err := os.ReadFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file %s: %w", file, err)
+		}
+
+		clientSecret = strings.TrimSpace(string(content))
+	}
+
 	config := clientcredentials.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		TokenURL:     tokenEndpoint,
 	}
 
