@@ -1,6 +1,6 @@
 {{- define "iam-runtime-infratographer.configmap" }}
 {{- $values := (index .Subcharts "iam-runtime-infratographer").Values -}}
-{{- $defaultConfig := dict "server" (dict "socketPath" "/var/iam-runtime/runtime.sock") }}
+{{- $defaultConfig := dict "server" (dict "socketPath" (printf "%s/runtime.sock" .Values.socketVolumeMountPath)) }}
 ---
 apiVersion: v1
 kind: ConfigMap
