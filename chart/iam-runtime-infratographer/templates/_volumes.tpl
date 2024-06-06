@@ -9,5 +9,5 @@
 
 {{- define "iam-runtime-infratographer.volumeMounts" -}}
 - name: {{ include "iam-runtime-infratographer.resource.fullname" (dict "suffix" "socket" "context" $) | quote }}
-  mountPath: {{ .Values.socketVolumeMountPath }}
+  mountPath: {{ .Values.socketVolumeMountPath }}/
 {{- end }}

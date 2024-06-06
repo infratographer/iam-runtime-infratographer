@@ -79,7 +79,7 @@ restartPolicy: ""
 volumeMounts: {}
 
 # -- Mount path for the iam runtime socket
-socketVolumeMountPath: /var/iam-runtime/
+socketVolumeMountPath: /var/iam-runtime
 
 # -- resource limits & requests
 # ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
