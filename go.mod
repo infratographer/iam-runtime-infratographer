@@ -5,7 +5,7 @@ go 1.22.1
 require (
 	github.com/MicahParks/jwkset v0.5.17
 	github.com/MicahParks/keyfunc/v3 v3.3.2
-	github.com/go-jose/go-jose/v4 v4.0.1
+	github.com/go-jose/go-jose/v4 v4.0.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/metal-toolbox/iam-runtime v0.4.1
