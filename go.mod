@@ -3,8 +3,8 @@ module go.infratographer.com/iam-runtime-infratographer
 go 1.22.1
 
 require (
-	github.com/MicahParks/jwkset v0.5.17
-	github.com/MicahParks/keyfunc/v3 v3.3.2
+	github.com/MicahParks/jwkset v0.5.18
+	github.com/MicahParks/keyfunc/v3 v3.3.3
 	github.com/go-jose/go-jose/v4 v4.0.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
