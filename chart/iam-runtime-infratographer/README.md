@@ -48,7 +48,7 @@ iam-runtime-infratographer:
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | common | 2.18.0 |
+| https://charts.bitnami.com/bitnami | common | 2.19.2 |
 
 ## Values
 
