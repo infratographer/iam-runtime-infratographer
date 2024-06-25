@@ -7,7 +7,7 @@
   {{- $prefix := include "iam-runtime-infratographer.fullname" .context }}
   {{- $reduce := sub (add (len $prefix) (len .suffix) 1) 63 }}
   {{- if gt $reduce 0 }}
-    {{- $prefix = trunc (add 63 $reduce) $prefix | trimSuffix "-" }}
+    {{- $prefix = trunc (add 63 $reduce | int) $prefix | trimSuffix "-" }}
   {{- end }}
   {{- printf "%s-%s" $prefix .suffix -}}
 {{- end }}
