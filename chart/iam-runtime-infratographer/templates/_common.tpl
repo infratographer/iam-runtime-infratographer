@@ -5,10 +5,9 @@
 
 {{- define "iam-runtime-infratographer.resource.fullname" }}
   {{- $prefix := include "iam-runtime-infratographer.fullname" .context }}
-  {{- $reduce := sub (add (len $prefix) (len .suffix) 1) 63 }}
-  {{- if gt $reduce 0 }}
-    {{- $prefix = trunc (add 63 $reduce | int) $prefix | trimSuffix "-" }}
-  {{- end }}
+  {{- $totalLength := add (len $prefix) (len .suffix) 1 | int }}
+  {{- $trimLength := sub $totalLength 63 | int }}
+  {{- $prefix = trunc (sub (len $prefix) $trimLength | int) $prefix | trimSuffix "-" }}
   {{- printf "%s-%s" $prefix .suffix -}}
 {{- end }}
 
