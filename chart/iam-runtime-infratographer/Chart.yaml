@@ -7,5 +7,5 @@ version: v0.0.1
 home: http://github.com/infratographer/iam-runtime-infratographer
 dependencies:
   - name: common
-    version: 2.20.3
+    version: 2.20.5
     repository: https://charts.bitnami.com/bitnami
