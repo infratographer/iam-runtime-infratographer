@@ -18,6 +18,9 @@ import (
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/authorization"
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/identity"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/attribute"
+	tcodes "go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -100,11 +103,17 @@ func (s *server) Stop() {
 
 // ValidateCredential ensures that the given credential is a valid JWT issued by the OIDC issuer
 // the runtime was configured with.
-func (s *server) ValidateCredential(_ context.Context, req *authentication.ValidateCredentialRequest) (*authentication.ValidateCredentialResponse, error) {
+func (s *server) ValidateCredential(ctx context.Context, req *authentication.ValidateCredentialRequest) (*authentication.ValidateCredentialResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
 	s.logger.Info("received CheckAccess request")
 
 	sub, claims, err := s.validator.ValidateToken(req.Credential)
 	if err != nil {
+		span.RecordError(err)
+
+		s.logger.Errorw("invalid token", "error", err)
+
 		resp := &authentication.ValidateCredentialResponse{
 			Result: authentication.ValidateCredentialResponse_RESULT_INVALID,
 		}
@@ -114,6 +123,9 @@ func (s *server) ValidateCredential(_ context.Context, req *authentication.Valid
 
 	claimsStruct, err := structpb.NewStruct(claims)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(tcodes.Error, err.Error())
+
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
 	}
 
@@ -130,11 +142,16 @@ func (s *server) ValidateCredential(_ context.Context, req *authentication.Valid
 
 // GetAccessToken returns a token from the configured token source.
 func (s *server) GetAccessToken(ctx context.Context, req *identity.GetAccessTokenRequest) (*identity.GetAccessTokenResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
 	s.logger.Infow("received GetAccessToken request")
 
 	token, err := s.tokenSource.Token()
 	if err != nil {
-		s.logger.Errorw("failed to fetch token token from token source", err)
+		span.RecordError(err)
+		span.SetStatus(tcodes.Error, "failed to fetch token from token source: "+err.Error())
+
+		s.logger.Errorw("failed to fetch token from token source", "error", err)
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -149,6 +166,8 @@ func (s *server) GetAccessToken(ctx context.Context, req *identity.GetAccessToke
 // CheckAccess takes the given request and sends it to permissions-api, using the given credential
 // as a bearer token.
 func (s *server) CheckAccess(ctx context.Context, req *authorization.CheckAccessRequest) (*authorization.CheckAccessResponse, error) {
+	span := trace.SpanFromContext(ctx)
+
 	s.logger.Info("received CheckAccess request")
 
 	actions := make([]permissions.RequestAction, 0, len(req.Actions))
@@ -167,20 +186,29 @@ func (s *server) CheckAccess(ctx context.Context, req *authorization.CheckAccess
 	// status. Otherwise, we return a denial if the result was an explicit denial.
 	switch {
 	case err == nil:
+		span.AddEvent("allowed")
+
 		out := &authorization.CheckAccessResponse{
 			Result: authorization.CheckAccessResponse_RESULT_ALLOWED,
 		}
 
 		return out, nil
 	case errors.Is(err, permissions.ErrUnauthenticated):
+		span.RecordError(err)
+
 		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	case errors.Is(err, permissions.ErrPermissionDenied):
+		span.AddEvent("denied")
+
 		out := &authorization.CheckAccessResponse{
 			Result: authorization.CheckAccessResponse_RESULT_DENIED,
 		}
 
 		return out, nil
 	default:
+		span.RecordError(err)
+		span.SetStatus(tcodes.Error, "unexpected error: "+err.Error())
+
 		return nil, status.Errorf(codes.Unavailable, err.Error())
 	}
 }
@@ -189,7 +217,6 @@ func buildAuthRelations(rels []*authorization.Relationship) ([]events.AuthRelati
 	out := make([]events.AuthRelationshipRelation, len(rels))
 
 	for i, rel := range rels {
-
 		subjID, err := gidx.Parse(rel.SubjectId)
 		if err != nil {
 			return nil, err
@@ -205,13 +232,25 @@ func buildAuthRelations(rels []*authorization.Relationship) ([]events.AuthRelati
 }
 
 func (s *server) publishRelationships(ctx context.Context, action events.AuthRelationshipAction, resourceIDStr string, relationships []*authorization.Relationship) error {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.String("resource.id", resourceIDStr),
+		attribute.String("resource.action", string(action)),
+		attribute.Int("resource.relationships", len(relationships)),
+	)
+
 	resourceID, err := gidx.Parse(resourceIDStr)
 	if err != nil {
+		span.RecordError(err)
+
 		return err
 	}
 
 	relations, err := buildAuthRelations(relationships)
 	if err != nil {
+		span.RecordError(err)
+
 		return err
 	}
 
@@ -225,16 +264,24 @@ func (s *server) publishRelationships(ctx context.Context, action events.AuthRel
 
 	authResp, err := s.publisher.PublishAuthRelationshipRequest(ctx, authReq)
 	if err != nil {
+		span.RecordError(err)
+
 		return err
 	}
 
 	if err := authResp.Error(); err != nil {
+		span.RecordError(err)
+
 		return err
 	}
 
 	if errs := authResp.Message().Errors; len(errs) != 0 {
+		span.RecordError(errs)
+
 		return errs
 	}
+
+	span.AddEvent("relationships published")
 
 	return nil
 }

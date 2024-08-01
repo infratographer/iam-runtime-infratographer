@@ -9,6 +9,7 @@
     }
   ],
   "postUpdateOptions": [
-    "gomodTidy"
+    "gomodTidy",
+    "helmUpdateSubChartArchives"
   ]
 }
