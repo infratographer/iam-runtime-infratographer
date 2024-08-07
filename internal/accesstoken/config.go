@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"go.infratographer.com/iam-runtime-infratographer/internal/filetokensource"
 	"go.uber.org/multierr"
@@ -42,6 +43,10 @@ type Config struct {
 	// Exchange configures where tokens get exchanges at.
 	// If Issuer is empty, token exchange is disabled.
 	Exchange AccessTokenExchangeConfig
+
+	// ExpiryDelta sets early expiry validation for the token.
+	// Default is 10 seconds.
+	ExpiryDelta time.Duration
 }
 
 // Validate ensures the config has been configured properly.

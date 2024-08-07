@@ -40,12 +40,13 @@ config:
   accessToken:
     # -- enabled configures the access token source for GetAccessToken requests.
     enabled: false
+    # -- (duration) expiryDelta sets early expiry validation for the token.
+    # @default -- 10s
+    expiryDelta: 0
     source:
       fileToken:
         # -- tokenPath is the path to the source jwt token.
         tokenPath: ""
-        # -- noReuseToken if enabled disables reuse of tokens while they're still valid.
-        noReuseToken: false
       clientCredentials:
         # -- issuer specifies the URL for the issuer for the token request.
         # The Issuer must support OpenID discovery to discover the token endpoint.

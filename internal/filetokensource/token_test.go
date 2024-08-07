@@ -47,40 +47,10 @@ func TestToken(t *testing.T) {
 			}},
 		},
 		{
-			"reuse token",
-			&TokenSource{},
-			[]fileToken{
-				{subject: "token1", expectSubject: "token1"},
-				{subject: "token2", expectSubject: "token1"},
-			},
-		},
-		{
 			"no reuse token",
-			&TokenSource{
-				noReuseToken: true,
-			},
-			[]fileToken{
-				{subject: "token1", expectSubject: "token1"},
-				{subject: "token2", expectSubject: "token2"},
-			},
-		},
-		{
-			"reuse: no error returned",
 			&TokenSource{},
 			[]fileToken{
 				{subject: "token1", expectSubject: "token1"},
-				{subject: "", expectSubject: "token1"},
-				{subject: "token2", expectSubject: "token1"},
-			},
-		},
-		{
-			"no reuse: error returned",
-			&TokenSource{
-				noReuseToken: true,
-			},
-			[]fileToken{
-				{subject: "token1", expectSubject: "token1"},
-				{subject: "", expectError: jwt.ErrTokenMalformed},
 				{subject: "token2", expectSubject: "token2"},
 			},
 		},
