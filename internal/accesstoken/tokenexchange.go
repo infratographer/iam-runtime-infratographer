@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"golang.org/x/oauth2"
@@ -33,67 +32,33 @@ const (
 type exchangeTokenSource struct {
 	cfg            AccessTokenExchangeConfig
 	ctx            context.Context
-	mu             sync.Mutex
 	upstream       oauth2.TokenSource
-	upstreamToken  *oauth2.Token
 	exchangeConfig oauth2.Config
-	token          *oauth2.Token
 }
 
 // Token retrieves an OAuth 2.0 access token from the configured issuer using token exchange.
-// Tokens are reused as long as they are valid.
-// Upstream tokens used as the source for the exchange are reused as long as they are valid.
 func (s *exchangeTokenSource) Token() (*oauth2.Token, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if s.token != nil && s.token.Valid() {
-		return s.token, nil
+	upstreamToken, err := s.upstream.Token()
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrUpstreamTokenRequestFailed, err)
 	}
 
-	if err := s.refreshUpstream(); err != nil {
-		return s.token, err
-	}
-
-	if err := s.exchange(); err != nil {
-		return s.token, err
-	}
-
-	return s.token, nil
-}
-
-func (s *exchangeTokenSource) refreshUpstream() error {
-	if s.upstreamToken == nil || !s.upstreamToken.Valid() {
-		token, err := s.upstream.Token()
-		if err != nil {
-			return fmt.Errorf("%w: %w", ErrUpstreamTokenRequestFailed, err)
-		}
-
-		s.upstreamToken = token
-	}
-
-	return nil
-}
-
-func (s *exchangeTokenSource) exchange() error {
 	token, err := s.exchangeConfig.Exchange(s.ctx, "",
 		oauth2.SetAuthURLParam("grant_type", s.cfg.GrantType),
-		oauth2.SetAuthURLParam("subject_token", s.upstreamToken.AccessToken),
+		oauth2.SetAuthURLParam("subject_token", upstreamToken.AccessToken),
 		oauth2.SetAuthURLParam("subject_token_type", s.cfg.TokenType),
 	)
 	if err != nil {
 		if rErr, ok := err.(*oauth2.RetrieveError); ok {
 			if rErr.Response.StatusCode == http.StatusBadRequest {
-				return fmt.Errorf("%w: %w", ErrInvalidTokenExchangeRequest, rErr)
+				return nil, fmt.Errorf("%w: %w", ErrInvalidTokenExchangeRequest, rErr)
 			}
 		}
 
-		return fmt.Errorf("%w: %w", ErrTokenExchangeRequestFailed, err)
+		return nil, fmt.Errorf("%w: %w", ErrTokenExchangeRequestFailed, err)
 	}
 
-	s.token = token
-
-	return nil
+	return token, nil
 }
 
 func newExchangeTokenSource(ctx context.Context, cfg AccessTokenExchangeConfig, upstream oauth2.TokenSource) (oauth2.TokenSource, error) {

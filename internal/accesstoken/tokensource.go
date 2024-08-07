@@ -26,6 +26,8 @@ func (c Config) toTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
 		}
 	}
 
+	source = oauth2.ReuseTokenSourceWithExpiry(nil, source, c.ExpiryDelta)
+
 	return source, nil
 }
 
