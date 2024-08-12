@@ -79,6 +79,10 @@ restartPolicy: ""
 # ref: https://kubernetes.io/docs/concepts/storage/volumes/
 volumeMounts: {}
 
+# -- extraEnv defines additional environment variables to include with the container
+# ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+extraEnv: {}
+
 # -- resource limits & requests
 # ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}

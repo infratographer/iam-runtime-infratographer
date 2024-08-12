@@ -12,6 +12,9 @@ securityContext: {{- toYaml . | nindent 2 }}
 {{- with $values.resources }}
 resources: {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- with $values.extraEnv }}
+env: {{- toYaml . | nindent 2 }}
+{{- end }}
 volumeMounts:
   - name: {{ include "iam-runtime-infratographer.resource.fullname" (dict "suffix" "config" "context" $) | quote }}
     mountPath: /etc/iam-runtime-infratographer/
