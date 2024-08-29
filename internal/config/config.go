@@ -16,5 +16,5 @@ type Config struct {
 	Events      eventsx.Config
 	Server      server.Config
 	Tracing     otelx.Config
-	AccessToken accesstoken.Config
+	AccessToken accesstoken.Config `mapstructure:"accessTokenProvider"`
 }

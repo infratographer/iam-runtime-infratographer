@@ -35,6 +35,7 @@ func init() {
 	permissions.AddFlags(cmdFlags)
 	eventsx.AddFlags(cmdFlags)
 	server.AddFlags(cmdFlags)
+	accesstoken.AddFlags(cmdFlags)
 
 	if err := viper.BindPFlags(cmdFlags); err != nil {
 		panic(err)
