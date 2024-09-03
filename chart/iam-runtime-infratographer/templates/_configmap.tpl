@@ -1,6 +1,14 @@
 {{- define "iam-runtime-infratographer.configmap" }}
 {{- $values := (index .Subcharts "iam-runtime-infratographer").Values -}}
 {{- $defaultConfig := dict "server" (dict "socketPath" "/var/iam-runtime/runtime.sock") }}
+{{- $config := include "iam-runtime-infratographer.omit" (dict
+        "source" (merge $defaultConfig $values.config)
+        "omit" (list
+          "events.nats.token"
+          "accessTokenProvider.source.clientCredentials.clientSecret"
+        )
+    )
+}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -9,5 +17,5 @@ metadata:
   labels: {{- include "common.labels.standard" $ | nindent 4 }}
 data:
   config.yaml: |
-    {{- tpl (merge $defaultConfig $values.config | toYaml) $ | nindent 4 }}
+    {{- tpl $config $ | nindent 4 }}
 {{- end }}
