@@ -2,10 +2,12 @@ package accesstoken
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"net/url"
 	"time"
 
+	"github.com/spf13/pflag"
 	"go.infratographer.com/iam-runtime-infratographer/internal/filetokensource"
 	"go.uber.org/multierr"
 )
@@ -69,8 +71,8 @@ func (c Config) Validate() error {
 // AccessTokenSourceConfig configures the source token location for access token exchanges.
 // Only one source may be configured at a time.
 type AccessTokenSourceConfig struct {
-	// FileToken specifies the configuration for sourcing tokens from a file.
-	FileToken filetokensource.Config
+	// File specifies the configuration for sourcing tokens from a file.
+	File filetokensource.Config
 
 	// ClientCredentials specifies the oauth2 credentials source the token from.
 	ClientCredentials ClientCredentialConfig
@@ -80,10 +82,10 @@ type AccessTokenSourceConfig struct {
 func (c AccessTokenSourceConfig) Validate() error {
 	var configured int
 
-	if c.FileToken.Configured() {
+	if c.File.Configured() {
 		configured++
 
-		if err := c.FileToken.Validate(); err != nil {
+		if err := c.File.Validate(); err != nil {
 			return fmt.Errorf("fileToken: %w", err)
 		}
 	}
@@ -165,4 +167,19 @@ func (c ClientCredentialConfig) Validate() error {
 	}
 
 	return nil
+}
+
+func AddFlags(flags *pflag.FlagSet) {
+	flags.Bool("accessTokenProvider.enabled", false, "enabled configures the access token source for GetAccessToken requests")
+
+	flags.String("accessTokenProvider.source.file.tokenpath", "", "tokenPath is the path to the source jwt token")
+	flags.String("accessTokenProvider.source.clientCredentials.issuer", "", "issuer specifies the URL for the issuer for the token request. The Issuer must support OpenID discovery to discover the token endpoint.")
+	flags.String("accessTokenProvider.source.clientCredentials.clientID", "", "clientID is the client credentials id which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-id`")
+	flags.String("accessTokenProvider.source.clientCredentials.clientSecret", "", "clientSecret is the client credentials secret which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-secret`")
+
+	flag.String("accessTokenProvider.exchange.issuer", "", "issuer specifies the URL for the issuer for the exchanged token. The Issuer must support OpenID discovery to discover the token endpoint")
+	flag.String("accessTokenProvider.exchange.grantType", "urn:ietf:params:oauth:grant-type:token-exchange", "grantType configures the grant type")
+	flag.String("accessTokenProvider.exchange.tokenType", "", "tokenType configures the token type")
+
+	flag.Duration("accessTokenProvider.expiryDelta", 10*time.Second, "sets the early expiry validation for the token")
 }

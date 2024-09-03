@@ -36,8 +36,8 @@ func (c AccessTokenSourceConfig) toTokenSource(ctx context.Context) (oauth2.Toke
 		return nil, err
 	}
 
-	if c.FileToken.Configured() {
-		tokensource, err := c.FileToken.ToTokenSource()
+	if c.File.Configured() {
+		tokensource, err := c.File.ToTokenSource()
 		if err != nil {
 			return nil, fmt.Errorf("file token: %w", err)
 		}
