@@ -7,6 +7,6 @@ metadata:
   name: {{ include "iam-runtime-infratographer.resource.fullname" (dict "suffix" "secrets" "context" $) | quote }}
   labels: {{- include "common.labels.standard" $ | nindent 4 }}
 data:
-  natsToken: {{ $values.secrets.nats.token | quote }}
-  clientSecret: {{ $values.secrets.accessToken.source.clientSecret | quote }}
+  IAMRUNTIME_EVENTS_NATS_TOKEN: {{ $values.secrets.nats.token | quote }}
+  IAMRUNTIME_ACCESSTOKENPROVIDER_SOURCE_CLIENTCREDENTIALS_CLIENTSECRET: {{ $values.secrets.accessToken.source.clientSecret | quote }}
 {{- end }}
