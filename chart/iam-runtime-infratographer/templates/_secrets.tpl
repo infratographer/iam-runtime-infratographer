@@ -1,4 +1,4 @@
-{{- define "iam-runtime-infratographer.secrets" }}
+{{- define "iam-runtime-infratographer._secrets" }}
 {{- $values := (index .Subcharts "iam-runtime-infratographer").Values -}}
 ---
 apiVersion: v1
