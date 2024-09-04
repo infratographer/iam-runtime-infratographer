@@ -48,21 +48,21 @@ iam-runtime-infratographer:
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | common | 2.20.5 |
+| https://charts.bitnami.com/bitnami | common | 2.22.0 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| config.accessToken.enabled | bool | `false` | enabled configures the access token source for GetAccessToken requests. |
-| config.accessToken.exchange.grantType | string | urn:ietf:params:oauth:grant-type:token-exchange | grantType configures the grant type |
-| config.accessToken.exchange.issuer | string | `""` | issuer specifies the URL for the issuer for the exchanged token. The Issuer must support OpenID discovery to discover the token endpoint. |
-| config.accessToken.exchange.tokenType | string | urn:ietf:params:oauth:token-type:jwt | tokenType configures the token type |
-| config.accessToken.expiryDelta | duration | 10s | expiryDelta sets early expiry validation for the token. |
-| config.accessToken.source.clientCredentials.clientID | string | `""` | clientID is the client credentials id which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-id` |
-| config.accessToken.source.clientCredentials.clientSecret | string | `""` | clientSecret is the client credentials secret which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-secret` |
-| config.accessToken.source.clientCredentials.issuer | string | `""` | issuer specifies the URL for the issuer for the token request. The Issuer must support OpenID discovery to discover the token endpoint. |
-| config.accessToken.source.fileToken.tokenPath | string | `""` | tokenPath is the path to the source jwt token. |
+| config.accessTokenProvider.enabled | bool | `false` | enabled configures the access token source for GetAccessToken requests. |
+| config.accessTokenProvider.exchange.grantType | string | urn:ietf:params:oauth:grant-type:token-exchange | grantType configures the grant type |
+| config.accessTokenProvider.exchange.issuer | string | `""` | issuer specifies the URL for the issuer for the exchanged token. The Issuer must support OpenID discovery to discover the token endpoint. |
+| config.accessTokenProvider.exchange.tokenType | string | urn:ietf:params:oauth:token-type:jwt | tokenType configures the token type |
+| config.accessTokenProvider.expiryDelta | duration | 10s | expiryDelta sets early expiry validation for the token. |
+| config.accessTokenProvider.source.clientCredentials.clientID | string | `""` | clientID is the client credentials id which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-id` |
+| config.accessTokenProvider.source.clientCredentials.clientSecret | string | `""` | clientSecret is the client credentials secret which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-secret` |
+| config.accessTokenProvider.source.clientCredentials.issuer | string | `""` | issuer specifies the URL for the issuer for the token request. The Issuer must support OpenID discovery to discover the token endpoint. |
+| config.accessTokenProvider.source.file.tokenPath | string | `""` | tokenPath is the path to the source jwt token. |
 | config.events.enabled | bool | `false` | enabled enables NATS event-based functions. |
 | config.events.nats.credsFile | string | `""` | credsFile path to NATS credentials file |
 | config.events.nats.publishPrefix | string | `""` | publishPrefix NATS publish prefix to use. |
@@ -75,6 +75,7 @@ iam-runtime-infratographer:
 | config.tracing.enabled | bool | `false` | enabled initializes otel tracing. |
 | config.tracing.insecure | bool | `false` | insecure if TLS should be disabled. |
 | config.tracing.url | string | `""` | url gRPC URL for OpenTelemetry collector. |
+| extraEnv | object | `{}` | extraEnv defines additional environment variables to include with the container ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy is the image pull policy for the service image |
 | image.repository | string | `"ghcr.io/infratographer/iam-runtime-infratographer"` | repository is the image repository to pull the image from |
 | image.tag | string | `""` | tag is the image tag to use. Defaults to the chart's app version |
