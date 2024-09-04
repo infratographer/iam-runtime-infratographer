@@ -1,4 +1,8 @@
 {{- define "iam-runtime-infratographer.configmap" }}
+{{ fail "iam-runtime-infratographer.configmap has been deprecated, use iam-runtime-infratographer.manifests instead." }}
+{{- end }}
+
+{{- define "iam-runtime-infratographer._configmap" }}
 {{- $values := (index .Subcharts "iam-runtime-infratographer").Values -}}
 {{- $defaultConfig := dict "server" (dict "socketPath" "/var/iam-runtime/runtime.sock") }}
 {{- $config := include "iam-runtime-infratographer.omit" (dict
