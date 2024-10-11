@@ -106,7 +106,7 @@ func (s *server) Stop() {
 func (s *server) ValidateCredential(ctx context.Context, req *authentication.ValidateCredentialRequest) (*authentication.ValidateCredentialResponse, error) {
 	span := trace.SpanFromContext(ctx)
 
-	s.logger.Info("received CheckAccess request")
+	s.logger.Info("received ValidateCredential request")
 
 	sub, claims, err := s.validator.ValidateToken(req.Credential)
 	if err != nil {
