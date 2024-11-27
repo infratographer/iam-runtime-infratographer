@@ -71,6 +71,19 @@ iam-runtime-infratographer:
 | config.events.nats.url | string | `""` | url NATS server url to use. |
 | config.jwt.issuer | string | `""` | issuer Issuer to use for JWT validation. |
 | config.jwt.jwksURI | string | `""` | jwksURI JWKS URI to use for JWT validation. |
+| config.permissions.discovery.check.concurrency | int | `5` | concurrency is the number of hosts to concurrently check. |
+| config.permissions.discovery.check.count | int | `5` | count is the number of checks to run on each host to check for connection latency. |
+| config.permissions.discovery.check.delay | string | `"200ms"` | delay is the delay between requests for a host. |
+| config.permissions.discovery.check.interval | string | `"1m"` | interval is how frequent to check for healthiness on hosts. |
+| config.permissions.discovery.check.path | string | `"/readyz"` | path is the uri path to fetch to check if host is healthy. |
+| config.permissions.discovery.check.scheme | string | `""` | scheme sets the uri scheme. Default is http unless discovered port is 443 in which https will be used. |
+| config.permissions.discovery.check.timeout | string | `"2s"` | timeout sets the maximum amount of time a request can wait before canceling the request. |
+| config.permissions.discovery.disable | bool | `false` | disable SRV discovery. |
+| config.permissions.discovery.fallback | string | `""` | fallback sets the fallback address if no hosts are found or all hosts are unhealthy. The default fallback host is the permissions.host value. |
+| config.permissions.discovery.interval | string | `"15m"` | interval to check for new SRV records. |
+| config.permissions.discovery.optional | bool | `true` | optional allows SRV records to be optional. If no SRV records are found or all endpoints are unhealthy, the fallback host is used. |
+| config.permissions.discovery.prefer | string | `""` | prefer sets the preferred SRV record. (skips priority, weight and duration ordering) |
+| config.permissions.discovery.quick | bool | `false` | quick doesn't wait for discovery and health checks to complete before selecting a host. |
 | config.permissions.host | string | `""` | host permissions-api host to use. |
 | config.tracing.enabled | bool | `false` | enabled initializes otel tracing. |
 | config.tracing.insecure | bool | `false` | insecure if TLS should be disabled. |
