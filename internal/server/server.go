@@ -126,7 +126,7 @@ func (s *server) ValidateCredential(ctx context.Context, req *authentication.Val
 		span.RecordError(err)
 		span.SetStatus(tcodes.Error, err.Error())
 
-		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
 
 	resp := &authentication.ValidateCredentialResponse{
@@ -196,7 +196,7 @@ func (s *server) CheckAccess(ctx context.Context, req *authorization.CheckAccess
 	case errors.Is(err, permissions.ErrUnauthenticated):
 		span.RecordError(err)
 
-		return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, permissions.ErrPermissionDenied):
 		span.AddEvent("denied")
 
@@ -209,7 +209,7 @@ func (s *server) CheckAccess(ctx context.Context, req *authorization.CheckAccess
 		span.RecordError(err)
 		span.SetStatus(tcodes.Error, "unexpected error: "+err.Error())
 
-		return nil, status.Errorf(codes.Unavailable, err.Error())
+		return nil, status.Error(codes.Unavailable, err.Error())
 	}
 }
 

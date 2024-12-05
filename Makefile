@@ -4,7 +4,7 @@ GOOS ?= linux
 GOARCH ?= amd64
 
 GOLANGCI_LINT_REPO = github.com/golangci/golangci-lint
-GOLANGCI_LINT_VERSION = v1.56.1
+GOLANGCI_LINT_VERSION = v1.62.2
 
 HELM_DOCS_REPO = github.com/norwoodj/helm-docs
 HELM_DOCS_VERSION = v1.13.1
