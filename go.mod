@@ -5,8 +5,8 @@ go 1.22.5
 toolchain go1.22.6
 
 require (
-	github.com/MicahParks/jwkset v0.5.18
-	github.com/MicahParks/keyfunc/v3 v3.3.3
+	github.com/MicahParks/jwkset v0.5.19
+	github.com/MicahParks/keyfunc/v3 v3.3.5
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-cleanhttp v0.5.2
