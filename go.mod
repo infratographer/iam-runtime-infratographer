@@ -1,8 +1,8 @@
 module go.infratographer.com/iam-runtime-infratographer
 
-go 1.22.5
+go 1.23
 
-toolchain go1.22.6
+toolchain go1.23.4
 
 require (
 	github.com/MicahParks/jwkset v0.5.20
