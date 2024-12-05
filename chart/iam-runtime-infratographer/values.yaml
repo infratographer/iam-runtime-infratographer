@@ -16,6 +16,37 @@ config:
   permissions:
     # -- host permissions-api host to use.
     host: ""
+
+    discovery:
+      # -- disable SRV discovery.
+      disable: false
+      # -- interval to check for new SRV records.
+      interval: 15m
+      # -- quick doesn't wait for discovery and health checks to complete before selecting a host.
+      quick: false
+      # -- optional allows SRV records to be optional.
+      # If no SRV records are found or all endpoints are unhealthy, the fallback host is used.
+      optional: true
+      # -- prefer sets the preferred SRV record. (skips priority, weight and duration ordering)
+      prefer: ""
+      # -- fallback sets the fallback address if no hosts are found or all hosts are unhealthy.
+      # The default fallback host is the permissions.host value.
+      fallback: ""
+      check:
+        # -- scheme sets the uri scheme. Default is http unless discovered port is 443 in which https will be used.
+        scheme: ""
+        # -- path is the uri path to fetch to check if host is healthy.
+        path: /readyz
+        # -- count is the number of checks to run on each host to check for connection latency.
+        count: 5
+        # -- interval is how frequent to check for healthiness on hosts.
+        interval: 1m
+        # -- delay is the delay between requests for a host.
+        delay: 200ms
+        # -- timeout sets the maximum amount of time a request can wait before canceling the request.
+        timeout: 2s
+        # -- concurrency is the number of hosts to concurrently check.
+        concurrency: 5
   events:
     # -- enabled enables NATS event-based functions.
     enabled: false

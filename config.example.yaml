@@ -2,6 +2,21 @@ server:
   socketpath: /tmp/runtime.sock
 permissions:
   host: permissions-api.enterprise.dev
+  discovery:
+    disable: false
+    interval: 15m
+    quick: false
+    optional: true
+    prefer: ""
+    fallback: ""
+    check:
+      scheme: ""
+      path: /readyz
+      count: 5
+      interval: 1m
+      delay: 200ms
+      timeout: 2s
+      concurrency: 5
 jwt:
   jwksuri: https://identity-api.enterprise.dev/jwks.json
   issuer: https://identity-api.enterprise.dev/

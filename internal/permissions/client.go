@@ -11,7 +11,8 @@ import (
 	"net/url"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"github.com/hashicorp/go-retryablehttp"
+	"go.infratographer.com/iam-runtime-infratographer/internal/selecthost"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -54,7 +55,7 @@ type Client interface {
 
 type client struct {
 	apiURL     string
-	httpClient *http.Client
+	httpClient *retryablehttp.Client
 	tracer     trace.Tracer
 	logger     *zap.SugaredLogger
 }
@@ -67,17 +68,25 @@ func NewClient(config Config, logger *zap.SugaredLogger) (Client, error) {
 		return nil, err
 	}
 
-	tracer := otel.GetTracerProvider().Tracer(tracerName)
+	transport, err := config.initTransport(http.DefaultTransport, selecthost.Logger(logger))
+	if err != nil {
+		return nil, err
+	}
 
-	httpClient := &http.Client{
+	httpClient := retryablehttp.NewClient()
+
+	httpClient.RetryWaitMin = 100 * time.Millisecond
+	httpClient.RetryWaitMax = 2 * time.Second
+	httpClient.Logger = &retryableLogger{logger}
+	httpClient.HTTPClient = &http.Client{
 		Timeout:   clientTimeout,
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Transport: transport,
 	}
 
 	out := &client{
 		apiURL:     apiURLString,
 		httpClient: httpClient,
-		tracer:     tracer,
+		tracer:     otel.GetTracerProvider().Tracer(tracerName),
 		logger:     logger,
 	}
 
@@ -118,7 +127,7 @@ func (c *client) CheckAccess(ctx context.Context, subjToken string, actions []Re
 	}
 
 	// Build the request to send up to permissions-api.
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.apiURL, &reqBody)
+	req, err := retryablehttp.NewRequestWithContext(ctx, http.MethodPost, c.apiURL, &reqBody)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		c.logger.Errorw("failed to create permissions-api request", "error", err)
