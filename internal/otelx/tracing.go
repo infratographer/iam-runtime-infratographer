@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	"go.infratographer.com/x/versionx"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -38,11 +39,13 @@ func initializeExporter(config Config) (trace.SpanExporter, error) {
 
 // Initialize sets up OpenTelemetry instrumentation.
 func Initialize(config Config, appName string) error {
+	appDetails := versionx.BuildDetails()
 	providerOpts := []trace.TracerProviderOption{
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(appName),
+			semconv.ServiceVersionKey.String(appDetails.Version),
 		)),
 	}
 
