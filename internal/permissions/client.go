@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	apiRoute = "/api/v1/allow"
+	apiRoute         = "/api/v1/allow"
+	healthCheckRoute = "/readyz"
 
 	contentTypeApplicationJSON = "application/json"
 
@@ -51,13 +52,17 @@ type checkPermissionRequest struct {
 // Client represents a client for interacting with permissions-api.
 type Client interface {
 	CheckAccess(ctx context.Context, subjToken string, actions []RequestAction) error
+
+	// HealthCheck returns nil when the service is healthy.
+	HealthCheck(ctx context.Context) error
 }
 
 type client struct {
-	apiURL     string
-	httpClient *retryablehttp.Client
-	tracer     trace.Tracer
-	logger     *zap.SugaredLogger
+	apiURL         string
+	healthCheckURL string
+	httpClient     *retryablehttp.Client
+	tracer         trace.Tracer
+	logger         *zap.SugaredLogger
 }
 
 // NewClient creates a new permissions-api client.
@@ -84,10 +89,11 @@ func NewClient(config Config, logger *zap.SugaredLogger) (Client, error) {
 	}
 
 	out := &client{
-		apiURL:     apiURLString,
-		httpClient: httpClient,
-		tracer:     otel.GetTracerProvider().Tracer(tracerName),
-		logger:     logger,
+		apiURL:         apiURLString,
+		healthCheckURL: fmt.Sprintf("https://%s%s", config.Host, healthCheckRoute),
+		httpClient:     httpClient,
+		tracer:         otel.GetTracerProvider().Tracer(tracerName),
+		logger:         logger,
 	}
 
 	return out, nil
@@ -189,4 +195,44 @@ func (c *client) CheckAccess(ctx context.Context, subjToken string, actions []Re
 	}
 
 	return err
+}
+
+// HealthCheck returns nil when the service is healthy.
+func (c *client) HealthCheck(ctx context.Context) error {
+	ctx, span := c.tracer.Start(ctx, "HealthCheck")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.healthCheckURL, nil)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		span.RecordError(err)
+
+		return err
+	}
+
+	resp, err := c.httpClient.HTTPClient.Do(req)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		span.RecordError(err)
+
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	_, _ = io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("%w: status code: %d", ErrUnexpectedResponse, resp.StatusCode)
+
+		span.SetStatus(codes.Error, err.Error())
+
+		return err
+	}
+
+	span.SetAttributes(attribute.String("healthcheck.outcome", "healthy"))
+
+	return nil
 }

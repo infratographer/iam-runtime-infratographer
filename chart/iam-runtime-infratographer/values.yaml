@@ -127,3 +127,19 @@ securityContext:
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 65532
+
+livenessProbe:
+  # -- enables liveness probe.
+  enabled: true
+  grpc:
+    # -- sets the grpc health service port.
+    port: 4784
+  timeoutSeconds: 10
+
+readinessProbe:
+  # -- enables readiness probe.
+  enabled: true
+  grpc:
+    # -- sets the grpc health service port.
+    port: 4784
+  timeoutSeconds: 10
