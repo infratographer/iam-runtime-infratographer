@@ -19,6 +19,16 @@ envFrom:
 env:
  {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- if $values.livenessProbe.enabled }}
+{{- with omit $values.livenessProbe "enabled" }}
+livenessProbe: {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- if $values.readinessProbe.enabled }}
+{{- with omit $values.readinessProbe "enabled" }}
+readinessProbe: {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
 volumeMounts:
   - name: {{ include "iam-runtime-infratographer.resource.fullname" (dict "suffix" "config" "context" $) | quote }}
     mountPath: /etc/iam-runtime-infratographer/

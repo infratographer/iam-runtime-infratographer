@@ -2,6 +2,7 @@ package accesstoken
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -9,9 +10,16 @@ import (
 	"strings"
 
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
+
+const tracerName = "go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
+
+var tracer = otel.GetTracerProvider().Tracer(tracerName)
 
 func (c Config) toTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
 	source, err := c.Source.toTokenSource(ctx)
@@ -105,12 +113,71 @@ func (c AccessTokenExchangeConfig) toTokenSource(ctx context.Context, upstream o
 	return newExchangeTokenSource(ctx, c, upstream)
 }
 
-// NewTokenSource initializes a new token source from the provided config.
-// If the config has Enabled false, then a disabled token source is returned.
-func NewTokenSource(ctx context.Context, cfg Config) (oauth2.TokenSource, error) {
-	if !cfg.Enabled {
-		return &disabledTokenSource{}, nil
+// HealthyTokenSource extends oauth2.TokenSource implementing the HealthChecker interface.
+type HealthyTokenSource interface {
+	oauth2.TokenSource
+
+	// HealthCheck returns nil when the service is healthy.
+	HealthCheck(ctx context.Context) error
+}
+
+type healthyTokenSource struct {
+	oauth2.TokenSource
+}
+
+// HealthCheck returns nil when the service is healthy.
+func (s *healthyTokenSource) HealthCheck(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "HealthCheck")
+	defer span.End()
+
+	errCh := make(chan error, 1)
+
+	go func() {
+		_, err := s.TokenSource.Token()
+		errCh <- err
+
+		close(errCh)
+	}()
+
+	select {
+	case <-ctx.Done():
+		span.SetStatus(codes.Error, ctx.Err().Error())
+		span.RecordError(ctx.Err())
+		span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
+
+		return ctx.Err()
+	case err := <-errCh:
+		if err != nil {
+			if errors.Is(err, ErrAccessTokenSourceNotEnabled) {
+				span.SetAttributes(attribute.String("healthcheck.outcome", "disabled"))
+
+				return nil
+			} else {
+				span.SetStatus(codes.Error, err.Error())
+				span.RecordError(err)
+				span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
+
+				return err
+			}
+		}
 	}
 
-	return cfg.toTokenSource(ctx)
+	span.SetAttributes(attribute.String("healthcheck.outcome", "healthy"))
+
+	return nil
+}
+
+// NewTokenSource initializes a new token source from the provided config.
+// If the config has Enabled false, then a disabled token source is returned.
+func NewTokenSource(ctx context.Context, cfg Config) (HealthyTokenSource, error) {
+	if !cfg.Enabled {
+		return &healthyTokenSource{&disabledTokenSource{}}, nil
+	}
+
+	ts, err := cfg.toTokenSource(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &healthyTokenSource{ts}, nil
 }

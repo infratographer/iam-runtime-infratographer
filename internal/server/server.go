@@ -3,10 +3,12 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"syscall"
 
+	"go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
 	"go.infratographer.com/iam-runtime-infratographer/internal/eventsx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"go.infratographer.com/iam-runtime-infratographer/internal/permissions"
@@ -24,6 +26,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	health "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -44,61 +47,139 @@ type server struct {
 
 	grpcSrv *grpc.Server
 
+	healthAddress string
+	healthSrv     *grpc.Server
+	healthChecks  HealthChecks
+
 	authentication.UnimplementedAuthenticationServer
 	authorization.UnimplementedAuthorizationServer
 	identity.UnimplementedIdentityServer
+	health.UnimplementedHealthServer
 }
 
 // NewServer creates a new runtime server.
-func NewServer(cfg Config, validator jwt.Validator, permClient permissions.Client, publisher eventsx.Publisher, tokenSource oauth2.TokenSource, logger *zap.SugaredLogger) (Server, error) {
+func NewServer(cfg Config, validator jwt.Validator, permClient permissions.Client, publisher eventsx.Publisher, tokenSource accesstoken.HealthyTokenSource, logger *zap.SugaredLogger) (Server, error) {
 	out := &server{
-		validator:   validator,
-		permClient:  permClient,
-		publisher:   publisher,
-		logger:      logger,
-		socketPath:  cfg.SocketPath,
-		tokenSource: tokenSource,
+		validator:     validator,
+		permClient:    permClient,
+		publisher:     publisher,
+		logger:        logger,
+		socketPath:    cfg.SocketPath,
+		tokenSource:   tokenSource,
+		healthAddress: cfg.HealthAddress,
 	}
 
-	grpcSrv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
-	authorization.RegisterAuthorizationServer(grpcSrv, out)
-	authentication.RegisterAuthenticationServer(grpcSrv, out)
-	identity.RegisterIdentityServer(grpcSrv, out)
-
-	out.grpcSrv = grpcSrv
+	out.healthChecks = HealthChecks{
+		"server":      out,
+		"jwt":         validator,
+		"permissions": permClient,
+		"events":      publisher,
+		"accessToken": tokenSource,
+	}
 
 	return out, nil
 }
 
 func (s *server) Listen() error {
+	errCh := make(chan error, 2)
+
+	if err := s.listenAndServeHealth(errCh); err != nil {
+		return fmt.Errorf("error starting health service: %w", err)
+	}
+
+	if err := s.listenAndServe(errCh); err != nil {
+		return fmt.Errorf("error starting grpc service: %w", err)
+	}
+
+	return <-errCh
+}
+
+func (s *server) listenAndServe(errCh chan<- error) error {
+	grpcSrv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
+	authorization.RegisterAuthorizationServer(grpcSrv, s)
+	authentication.RegisterAuthenticationServer(grpcSrv, s)
+	identity.RegisterIdentityServer(grpcSrv, s)
+	health.RegisterHealthServer(grpcSrv, s)
+
 	if _, err := os.Stat(s.socketPath); err == nil {
 		s.logger.Warnw("socket found, unlinking", "socket_path", s.socketPath)
 
 		if err := syscall.Unlink(s.socketPath); err != nil {
 			s.logger.Errorw("error unlinking socket", "error", err)
+
 			return err
 		}
 	}
 
 	listener, err := net.Listen("unix", s.socketPath)
 	if err != nil {
-		s.logger.Errorw("failed to listen", "error", err)
+		s.logger.Errorw("failed to listen on socket", "error", err)
+
 		return err
 	}
 
-	s.logger.Infow("starting server",
-		"address", s.socketPath,
-	)
+	s.logger.Infow("starting server", "address", s.socketPath)
 
-	return s.grpcSrv.Serve(listener)
+	s.grpcSrv = grpcSrv
+
+	go func() {
+		defer listener.Close()
+
+		errCh <- s.grpcSrv.Serve(listener)
+	}()
+
+	return nil
+}
+
+func (s *server) listenAndServeHealth(errCh chan<- error) error {
+	healthSrv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
+	health.RegisterHealthServer(healthSrv, s)
+
+	listener, err := net.Listen("tcp", s.healthAddress)
+	if err != nil {
+		s.logger.Errorw("failed to listen on health address", "error", err)
+
+		return err
+	}
+
+	s.logger.Infow("starting health server", "address", s.healthAddress)
+
+	s.healthSrv = healthSrv
+
+	go func() {
+		defer listener.Close()
+
+		errCh <- s.healthSrv.Serve(listener)
+	}()
+
+	return nil
 }
 
 func (s *server) Stop() {
-	if s.grpcSrv == nil {
-		return
+	if srv := s.grpcSrv; srv != nil {
+		s.grpcSrv = nil // clear to ensure health check reports not running.
+
+		srv.GracefulStop()
 	}
 
-	s.grpcSrv.GracefulStop()
+	if srv := s.healthSrv; srv != nil {
+		s.healthSrv = nil // clear to ensure health check reports not running.
+
+		srv.GracefulStop()
+	}
+}
+
+// HealthCheck returns nil when the service is healthy.
+func (s *server) HealthCheck(ctx context.Context) error {
+	if s.grpcSrv == nil {
+		return fmt.Errorf("%w: grpc service not running", ErrServerNotRunning)
+	}
+
+	if s.healthSrv == nil {
+		return fmt.Errorf("%w: health service not running", ErrServerNotRunning)
+	}
+
+	return nil
 }
 
 // ValidateCredential ensures that the given credential is a valid JWT issued by the OIDC issuer
