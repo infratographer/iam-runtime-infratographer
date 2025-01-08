@@ -58,6 +58,7 @@ type Client interface {
 }
 
 type client struct {
+	enabled        bool
 	apiURL         string
 	healthCheckURL string
 	httpClient     *retryablehttp.Client
@@ -67,6 +68,14 @@ type client struct {
 
 // NewClient creates a new permissions-api client.
 func NewClient(config Config, logger *zap.SugaredLogger) (Client, error) {
+	if config.Disable {
+		return &client{
+			enabled: false,
+			tracer:  otel.GetTracerProvider().Tracer(tracerName),
+			logger:  logger,
+		}, nil
+	}
+
 	apiURLString := fmt.Sprintf("https://%s%s", config.Host, apiRoute)
 
 	if _, err := url.Parse(apiURLString); err != nil {
@@ -89,6 +98,7 @@ func NewClient(config Config, logger *zap.SugaredLogger) (Client, error) {
 	}
 
 	out := &client{
+		enabled:        true,
 		apiURL:         apiURLString,
 		healthCheckURL: fmt.Sprintf("https://%s%s", config.Host, healthCheckRoute),
 		httpClient:     httpClient,
@@ -117,6 +127,13 @@ func checkResponse(resp *http.Response) error {
 func (c *client) CheckAccess(ctx context.Context, subjToken string, actions []RequestAction) error {
 	ctx, span := c.tracer.Start(ctx, "CheckAccess")
 	defer span.End()
+
+	if !c.enabled {
+		span.SetStatus(codes.Error, ErrServiceDisabled.Error())
+		c.logger.Error("CheckAccess called but service is disabled")
+
+		return ErrServiceDisabled
+	}
 
 	request := checkPermissionRequest{
 		Actions: actions,
@@ -201,6 +218,12 @@ func (c *client) CheckAccess(ctx context.Context, subjToken string, actions []Re
 func (c *client) HealthCheck(ctx context.Context) error {
 	ctx, span := c.tracer.Start(ctx, "HealthCheck")
 	defer span.End()
+
+	if !c.enabled {
+		span.SetAttributes(attribute.String("healthcheck.outcome", "disabled"))
+
+		return nil
+	}
 
 	span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
 

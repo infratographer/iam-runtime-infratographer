@@ -11,6 +11,9 @@ import (
 
 // Config represents a permissions-api client configuration.
 type Config struct {
+	// Disable disables the permissions service.
+	Disable bool
+
 	// Host represents a permissions-api host to hit.
 	Host string
 
@@ -21,7 +24,7 @@ type Config struct {
 func (c Config) initTransport(base http.RoundTripper, opts ...selecthost.Option) (http.RoundTripper, error) {
 	base = otelhttp.NewTransport(base)
 
-	if c.Discovery.Disable {
+	if c.Disable || c.Discovery.Disable {
 		return base, nil
 	}
 
@@ -170,5 +173,6 @@ type CheckConfig struct {
 
 // AddFlags sets the command line flags for the permissions-api client.
 func AddFlags(flags *pflag.FlagSet) {
+	flags.Bool("permissions.disable", false, "disables permissions service")
 	flags.String("permissions.host", "", "permissions-api host to use")
 }
