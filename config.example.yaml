@@ -1,6 +1,7 @@
 server:
   socketpath: /tmp/runtime.sock
 permissions:
+  disable: false
   host: permissions-api.enterprise.dev
   discovery:
     disable: false
@@ -18,6 +19,7 @@ permissions:
       timeout: 2s
       concurrency: 5
 jwt:
+  disable: false
   jwksuri: https://identity-api.enterprise.dev/jwks.json
   issuer: https://identity-api.enterprise.dev/
 events:

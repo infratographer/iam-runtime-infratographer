@@ -191,6 +191,12 @@ func (s *server) ValidateCredential(ctx context.Context, req *authentication.Val
 
 	sub, claims, err := s.validator.ValidateToken(req.Credential)
 	if err != nil {
+		if errors.Is(err, jwt.ErrServiceDisabled) {
+			span.SetStatus(tcodes.Error, err.Error())
+
+			return nil, err
+		}
+
 		span.RecordError(err)
 
 		s.logger.Errorw("invalid token", "error", err)

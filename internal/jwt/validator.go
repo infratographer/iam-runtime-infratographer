@@ -21,6 +21,9 @@ var (
 	// ErrIssuerKeysMissing is returned by the health check when no issuer keys exist in the store.
 	ErrIssuerKeysMissing = errors.New("issuer keys missing")
 
+	// ErrServiceDisabled is returned when calling a service method while the service is disabled.
+	ErrServiceDisabled = errors.New("jwt service disabled")
+
 	tracer = otel.GetTracerProvider().Tracer(tracerName)
 )
 
@@ -35,14 +38,21 @@ type Validator interface {
 }
 
 type validator struct {
-	kf     jwt.Keyfunc
-	parser *jwt.Parser
+	enabled bool
+	kf      jwt.Keyfunc
+	parser  *jwt.Parser
 
 	keyStorage jwkset.Storage
 }
 
 // NewValidator creates a validator with the given configuration.
 func NewValidator(config Config) (Validator, error) {
+	if config.Disable {
+		return &validator{
+			enabled: false,
+		}, nil
+	}
+
 	transport := otelhttp.NewTransport(http.DefaultTransport)
 	client := &http.Client{
 		Transport: transport,
@@ -78,8 +88,9 @@ func NewValidator(config Config) (Validator, error) {
 	)
 
 	out := &validator{
-		kf:     kf.Keyfunc,
-		parser: parser,
+		enabled: true,
+		kf:      kf.Keyfunc,
+		parser:  parser,
 
 		keyStorage: storage,
 	}
@@ -88,6 +99,10 @@ func NewValidator(config Config) (Validator, error) {
 }
 
 func (v *validator) ValidateToken(tokenString string) (string, map[string]any, error) {
+	if !v.enabled {
+		return "", nil, ErrServiceDisabled
+	}
+
 	mapClaims := jwt.MapClaims{}
 
 	_, err := v.parser.ParseWithClaims(tokenString, mapClaims, v.kf)
@@ -107,6 +122,12 @@ func (v *validator) ValidateToken(tokenString string) (string, map[string]any, e
 func (v *validator) HealthCheck(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "HealthCheck")
 	defer span.End()
+
+	if !v.enabled {
+		span.SetAttributes(attribute.String("healthcheck.outcome", "disabled"))
+
+		return nil
+	}
 
 	span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
 
