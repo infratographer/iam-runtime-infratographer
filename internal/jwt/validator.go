@@ -64,7 +64,8 @@ func NewValidator(config Config) (Validator, error) {
 	}
 
 	storageOpts := jwkset.HTTPClientStorageOptions{
-		Client: client,
+		Client:          client,
+		RefreshInterval: config.JWKSRefreshInterval,
 	}
 
 	storage, err := jwkset.NewStorageFromHTTP(jwksURL, storageOpts)

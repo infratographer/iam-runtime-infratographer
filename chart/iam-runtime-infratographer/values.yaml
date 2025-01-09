@@ -13,6 +13,8 @@ config:
     issuer: ""
     # -- jwksURI JWKS URI to use for JWT validation.
     jwksURI: ""
+    # -- jwksRefreshInterval sets the refresh interval for JWKS keys.
+    jwksRefreshInterval: 1h
   permissions:
     # -- host permissions-api host to use.
     host: ""

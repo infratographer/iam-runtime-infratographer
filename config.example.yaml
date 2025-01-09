@@ -20,8 +20,9 @@ permissions:
       concurrency: 5
 jwt:
   disable: false
-  jwksuri: https://identity-api.enterprise.dev/jwks.json
   issuer: https://identity-api.enterprise.dev/
+  jwksuri: https://identity-api.enterprise.dev/jwks.json
+  jwksrefreshinterval: 1h
 events:
   nats:
     url: nats://localhost:4222

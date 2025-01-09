@@ -48,7 +48,7 @@ iam-runtime-infratographer:
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | common | 2.22.0 |
+| https://charts.bitnami.com/bitnami | common | 2.27.0 |
 
 ## Values
 
@@ -70,6 +70,7 @@ iam-runtime-infratographer:
 | config.events.nats.token | string | `""` | token NATS user token to use. |
 | config.events.nats.url | string | `""` | url NATS server url to use. |
 | config.jwt.issuer | string | `""` | issuer Issuer to use for JWT validation. |
+| config.jwt.jwksRefreshInterval | string | `"1h"` | jwksRefreshInterval sets the refresh interval for JWKS keys. |
 | config.jwt.jwksURI | string | `""` | jwksURI JWKS URI to use for JWT validation. |
 | config.permissions.discovery.check.concurrency | int | `5` | concurrency is the number of hosts to concurrently check. |
 | config.permissions.discovery.check.count | int | `5` | count is the number of checks to run on each host to check for connection latency. |
@@ -92,6 +93,12 @@ iam-runtime-infratographer:
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy is the image pull policy for the service image |
 | image.repository | string | `"ghcr.io/infratographer/iam-runtime-infratographer"` | repository is the image repository to pull the image from |
 | image.tag | string | `""` | tag is the image tag to use. Defaults to the chart's app version |
+| livenessProbe.enabled | bool | `true` | enables liveness probe. |
+| livenessProbe.grpc.port | int | `4784` | sets the grpc health service port. |
+| livenessProbe.timeoutSeconds | int | `10` |  |
+| readinessProbe.enabled | bool | `true` | enables readiness probe. |
+| readinessProbe.grpc.port | int | `4784` | sets the grpc health service port. |
+| readinessProbe.timeoutSeconds | int | `10` |  |
 | resources | object | `{}` | resource limits & requests ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | restartPolicy | string | `""` | restartPolicy set to Always if using with initContainers on kube 1.29 and up with the SideContainer feature flag enabled. ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#sidecar-containers-and-pod-lifecycle |
 | securityContext | object | `{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":65532}` | securityContext configures the container's security context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
