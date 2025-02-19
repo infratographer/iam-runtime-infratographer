@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/metal-toolbox/iam-runtime v0.4.1
-	github.com/nats-io/nats.go v1.38.0
+	github.com/nats-io/nats.go v1.39.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
