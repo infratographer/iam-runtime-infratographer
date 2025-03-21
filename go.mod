@@ -8,7 +8,7 @@ require (
 	github.com/MicahParks/jwkset v0.6.0
 	github.com/MicahParks/keyfunc/v3 v3.3.7
 	github.com/go-jose/go-jose/v4 v4.0.4
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/labstack/echo/v4 v4.13.3
