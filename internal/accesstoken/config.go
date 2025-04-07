@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"go.infratographer.com/iam-runtime-infratographer/internal/filetokensource"
 	"go.uber.org/multierr"
+
+	"go.infratographer.com/iam-runtime-infratographer/internal/filetokensource"
 )
 
 var (
@@ -40,11 +41,11 @@ type Config struct {
 	Enabled bool
 
 	// Source configures the location to source tokens from.
-	Source AccessTokenSourceConfig
+	Source SourceConfig
 
 	// Exchange configures where tokens get exchanges at.
 	// If Issuer is empty, token exchange is disabled.
-	Exchange AccessTokenExchangeConfig
+	Exchange ExchangeConfig
 
 	// ExpiryDelta sets early expiry validation for the token.
 	// Default is 10 seconds.
@@ -68,9 +69,9 @@ func (c Config) Validate() error {
 	return errs
 }
 
-// AccessTokenSourceConfig configures the source token location for access token exchanges.
+// SourceConfig configures the source token location for access token exchanges.
 // Only one source may be configured at a time.
-type AccessTokenSourceConfig struct {
+type SourceConfig struct {
 	// File specifies the configuration for sourcing tokens from a file.
 	File filetokensource.Config
 
@@ -79,7 +80,7 @@ type AccessTokenSourceConfig struct {
 }
 
 // Validate ensures the config has been configured properly.
-func (c AccessTokenSourceConfig) Validate() error {
+func (c SourceConfig) Validate() error {
 	var configured int
 
 	if c.File.Configured() {
@@ -109,8 +110,8 @@ func (c AccessTokenSourceConfig) Validate() error {
 	return nil
 }
 
-// AccessTokenExchangeConfig configures the token exchange provider.
-type AccessTokenExchangeConfig struct {
+// ExchangeConfig configures the token exchange provider.
+type ExchangeConfig struct {
 	// Issuer specifies the URL for the issuer for the exchanged token.
 	// The Issuer must support OpenID discovery to discover the token endpoint.
 	Issuer string
@@ -122,12 +123,12 @@ type AccessTokenExchangeConfig struct {
 	TokenType string
 }
 
-func (c AccessTokenExchangeConfig) configured() bool {
+func (c ExchangeConfig) configured() bool {
 	return c.Issuer != ""
 }
 
 // Validate ensures the config has been configured properly.
-func (c AccessTokenExchangeConfig) Validate() error {
+func (c ExchangeConfig) Validate() error {
 	if _, err := url.Parse(c.Issuer); err != nil {
 		return err
 	}
@@ -135,7 +136,7 @@ func (c AccessTokenExchangeConfig) Validate() error {
 	return nil
 }
 
-// ClientCredential configures the client credential token source.
+// ClientCredentialConfig configures the client credential token source.
 type ClientCredentialConfig struct {
 	// Issuer specifies the URL for the issuer for the token request.
 	// The Issuer must support OpenID discovery to discover the token endpoint.
@@ -169,6 +170,7 @@ func (c ClientCredentialConfig) Validate() error {
 	return nil
 }
 
+// AddFlags registers access token flags to the provided flagset.
 func AddFlags(flags *pflag.FlagSet) {
 	flags.Bool("accessTokenProvider.enabled", false, "enabled configures the access token source for GetAccessToken requests")
 
@@ -181,5 +183,5 @@ func AddFlags(flags *pflag.FlagSet) {
 	flag.String("accessTokenProvider.exchange.grantType", "urn:ietf:params:oauth:grant-type:token-exchange", "grantType configures the grant type")
 	flag.String("accessTokenProvider.exchange.tokenType", "", "tokenType configures the token type")
 
-	flag.Duration("accessTokenProvider.expiryDelta", 10*time.Second, "sets the early expiry validation for the token")
+	flag.Duration("accessTokenProvider.expiryDelta", 10*time.Second, "sets the early expiry validation for the token") //nolint:mnd
 }

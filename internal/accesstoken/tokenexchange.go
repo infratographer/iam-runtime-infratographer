@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"golang.org/x/oauth2"
+
+	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 )
 
 var (
 	// TokenExchangeError is a root error for all other token exchange errors.
-	TokenExchangeError = errors.New("failed to exchange token") //nolint:revive,stylecheck // not returned directly, but used as a root error.
+	TokenExchangeError = errors.New("failed to exchange token") //nolint:revive,staticcheck // not returned directly, but used as a root error.
 
 	// ErrUpstreamTokenRequestFailed is returned when the upstream token provider returns an error.
 	ErrUpstreamTokenRequestFailed = fmt.Errorf("%w, upstream token request failed", TokenExchangeError)
@@ -30,7 +31,7 @@ const (
 )
 
 type exchangeTokenSource struct {
-	cfg            AccessTokenExchangeConfig
+	cfg            ExchangeConfig
 	ctx            context.Context
 	upstream       oauth2.TokenSource
 	exchangeConfig oauth2.Config
@@ -61,7 +62,7 @@ func (s *exchangeTokenSource) Token() (*oauth2.Token, error) {
 	return token, nil
 }
 
-func newExchangeTokenSource(ctx context.Context, cfg AccessTokenExchangeConfig, upstream oauth2.TokenSource) (oauth2.TokenSource, error) {
+func newExchangeTokenSource(ctx context.Context, cfg ExchangeConfig, upstream oauth2.TokenSource) (oauth2.TokenSource, error) {
 	tokenEndpoint, err := jwt.FetchIssuerTokenEndpoint(ctx, cfg.Issuer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch exchange issuer token endpoint: %w", err)

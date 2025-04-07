@@ -11,7 +11,7 @@ import (
 
 const serviceHealthCheckTimeout = 30 * time.Second
 
-// HealthCheck defines a health checker service.
+// HealthChecker defines a health checker service.
 type HealthChecker interface {
 	HealthCheck(ctx context.Context) error
 }

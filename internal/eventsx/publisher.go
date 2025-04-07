@@ -34,6 +34,7 @@ func (p publisher) PublishAuthRelationshipRequest(ctx context.Context, message e
 	if !p.enabled {
 		return nil, ErrPublishNotEnabled
 	}
+
 	return p.innerPub.PublishAuthRelationshipRequest(ctx, p.topic, message)
 }
 
