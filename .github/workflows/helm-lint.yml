@@ -2,6 +2,8 @@ name: Helm lint
 on:
   push:
   pull_request:
+  merge_group:
+
 jobs:
   helm-lint:
     name: lint
