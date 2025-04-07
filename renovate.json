@@ -1,19 +1,6 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
-  ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
-    },
-    {
-      "matchPackagePrefixes": ["go.opentelemetry.io"],
-      "groupName": "OTEL Packages"
-    }
-  ],
-  "postUpdateOptions": [
-    "gomodTidy",
-    "helmUpdateSubChartArchives"
+    "github>infratographer/renovate-config"
   ]
 }
