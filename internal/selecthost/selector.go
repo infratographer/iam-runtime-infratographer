@@ -256,7 +256,7 @@ func (s *Selector) selectHost(ctx context.Context) {
 		span.SetAttributes(attribute.Bool("host.changed", true))
 
 		// ensure host doesn't change for 5 check intervals (as long as it's still healthy)
-		s.stickyUntil = time.Now().Add(5 * s.checkInterval)
+		s.stickyUntil = time.Now().Add(5 * s.checkInterval) //nolint:mnd
 
 		if current == nil {
 			span.AddEvent("selected host: " + selected.ID())
@@ -277,7 +277,7 @@ func (s *Selector) selectHost(ctx context.Context) {
 		}
 	} else if selected != nil && current == selected && !sticky {
 		// If host remains the same but stickiness has expired, reset the sticky counter.
-		s.stickyUntil = time.Now().Add(5 * s.checkInterval)
+		s.stickyUntil = time.Now().Add(5 * s.checkInterval) //nolint:mnd
 	}
 
 	if selected == nil {
@@ -464,6 +464,7 @@ func (s *Selector) checkHosts(ctx context.Context) {
 // NewSelector creates a new selector service handler.
 // The target provided is automatically registered as the default fallback address.
 func NewSelector(target, service, protocol string, options ...Option) (*Selector, error) {
+	//nolint:mnd
 	sel := &Selector{
 		logger: zap.NewNop().Sugar(),
 

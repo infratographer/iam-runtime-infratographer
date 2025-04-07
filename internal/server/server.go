@@ -8,13 +8,14 @@ import (
 	"os"
 	"syscall"
 
+	"go.infratographer.com/x/events"
+	"go.infratographer.com/x/gidx"
+	"golang.org/x/oauth2"
+
 	"go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
 	"go.infratographer.com/iam-runtime-infratographer/internal/eventsx"
 	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"go.infratographer.com/iam-runtime-infratographer/internal/permissions"
-	"go.infratographer.com/x/events"
-	"go.infratographer.com/x/gidx"
-	"golang.org/x/oauth2"
 
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/authentication"
 	"github.com/metal-toolbox/iam-runtime/pkg/iam/runtime/authorization"
@@ -81,7 +82,7 @@ func NewServer(cfg Config, validator jwt.Validator, permClient permissions.Clien
 }
 
 func (s *server) Listen() error {
-	errCh := make(chan error, 2)
+	errCh := make(chan error, 2) //nolint:mnd
 
 	if err := s.listenAndServeHealth(errCh); err != nil {
 		return fmt.Errorf("error starting health service: %w", err)
@@ -123,7 +124,7 @@ func (s *server) listenAndServe(errCh chan<- error) error {
 	s.grpcSrv = grpcSrv
 
 	go func() {
-		defer listener.Close()
+		defer listener.Close() //nolint:errcheck
 
 		errCh <- s.grpcSrv.Serve(listener)
 	}()
@@ -147,7 +148,7 @@ func (s *server) listenAndServeHealth(errCh chan<- error) error {
 	s.healthSrv = healthSrv
 
 	go func() {
-		defer listener.Close()
+		defer listener.Close() //nolint:errcheck
 
 		errCh <- s.healthSrv.Serve(listener)
 	}()
@@ -170,7 +171,7 @@ func (s *server) Stop() {
 }
 
 // HealthCheck returns nil when the service is healthy.
-func (s *server) HealthCheck(ctx context.Context) error {
+func (s *server) HealthCheck(_ context.Context) error {
 	if s.grpcSrv == nil {
 		return fmt.Errorf("%w: grpc service not running", ErrServerNotRunning)
 	}
@@ -228,7 +229,7 @@ func (s *server) ValidateCredential(ctx context.Context, req *authentication.Val
 }
 
 // GetAccessToken returns a token from the configured token source.
-func (s *server) GetAccessToken(ctx context.Context, req *identity.GetAccessTokenRequest) (*identity.GetAccessTokenResponse, error) {
+func (s *server) GetAccessToken(ctx context.Context, _ *identity.GetAccessTokenRequest) (*identity.GetAccessTokenResponse, error) {
 	span := trace.SpanFromContext(ctx)
 
 	s.logger.Infow("received GetAccessToken request")

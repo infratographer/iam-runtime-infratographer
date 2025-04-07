@@ -9,12 +9,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
+
+	"go.infratographer.com/iam-runtime-infratographer/internal/jwt"
 )
 
 const tracerName = "go.infratographer.com/iam-runtime-infratographer/internal/accesstoken"
@@ -39,7 +40,7 @@ func (c Config) toTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
 	return source, nil
 }
 
-func (c AccessTokenSourceConfig) toTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
+func (c SourceConfig) toTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -105,7 +106,7 @@ func (c ClientCredentialConfig) toTokenSource(ctx context.Context) (oauth2.Token
 	return config.TokenSource(ctx), nil
 }
 
-func (c AccessTokenExchangeConfig) toTokenSource(ctx context.Context, upstream oauth2.TokenSource) (oauth2.TokenSource, error) {
+func (c ExchangeConfig) toTokenSource(ctx context.Context, upstream oauth2.TokenSource) (oauth2.TokenSource, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (s *healthyTokenSource) HealthCheck(ctx context.Context) error {
 	errCh := make(chan error, 1)
 
 	go func() {
-		_, err := s.TokenSource.Token()
+		_, err := s.Token()
 		errCh <- err
 
 		close(errCh)
@@ -152,13 +153,13 @@ func (s *healthyTokenSource) HealthCheck(ctx context.Context) error {
 				span.SetAttributes(attribute.String("healthcheck.outcome", "disabled"))
 
 				return nil
-			} else {
-				span.SetStatus(codes.Error, err.Error())
-				span.RecordError(err)
-				span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
-
-				return err
 			}
+
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+			span.SetAttributes(attribute.String("healthcheck.outcome", "unhealthy"))
+
+			return err
 		}
 	}
 

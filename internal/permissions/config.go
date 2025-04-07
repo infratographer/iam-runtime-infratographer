@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"go.infratographer.com/iam-runtime-infratographer/internal/selecthost"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
+	"go.infratographer.com/iam-runtime-infratographer/internal/selecthost"
 )
 
 // Config represents a permissions-api client configuration.

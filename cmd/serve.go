@@ -20,7 +20,7 @@ import (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "starts the IAM runtime server",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return serve(cmd.Context(), viper.GetViper(), appConfig)
 	},
 }

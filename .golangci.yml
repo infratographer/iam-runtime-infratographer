@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+
+version: "2"
+linters:
+  enable:
+    # Default
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+    # Additional
+    - bodyclose
+    - err113
+    - gocritic
+    - gocyclo
+    - misspell
+    - mnd
+    - noctx
+    - revive
+    - whitespace
+    - wsl
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        - go.infratographer.com/iam-runtime-infratographer

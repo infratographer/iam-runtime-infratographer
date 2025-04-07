@@ -12,12 +12,13 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
-	"go.infratographer.com/iam-runtime-infratographer/internal/selecthost"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+
+	"go.infratographer.com/iam-runtime-infratographer/internal/selecthost"
 )
 
 const (
@@ -89,8 +90,8 @@ func NewClient(config Config, logger *zap.SugaredLogger) (Client, error) {
 
 	httpClient := retryablehttp.NewClient()
 
-	httpClient.RetryWaitMin = 100 * time.Millisecond
-	httpClient.RetryWaitMax = 2 * time.Second
+	httpClient.RetryWaitMin = 100 * time.Millisecond //nolint:mnd
+	httpClient.RetryWaitMax = 2 * time.Second        //nolint:mnd
 	httpClient.Logger = &retryableLogger{logger}
 	httpClient.HTTPClient = &http.Client{
 		Timeout:   clientTimeout,
@@ -173,7 +174,7 @@ func (c *client) CheckAccess(ctx context.Context, subjToken string, actions []Re
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	// Check what the outcome of the request was; if it was fine, terminate early.
 	err = checkResponse(resp)
@@ -243,7 +244,7 @@ func (c *client) HealthCheck(ctx context.Context) error {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	_, _ = io.ReadAll(resp.Body)
 
