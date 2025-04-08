@@ -66,6 +66,10 @@ config:
   tracing:
     # -- enabled initializes otel tracing.
     enabled: false
+    # -- environment sets the trace environment.
+    environment: ""
+    # -- sample_ratio sets the sampling ratio.
+    sample_ratio: 1.0
     # -- url gRPC URL for OpenTelemetry collector.
     url: ""
     # -- insecure if TLS should be disabled.
