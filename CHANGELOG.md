@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.0.1...v1.1.0) (2025-04-08)
+
+
+### Features
+
+* support trace sample ratio ([#135](https://github.com/infratographer/iam-runtime-infratographer/issues/135)) ([48471e6](https://github.com/infratographer/iam-runtime-infratographer/commit/48471e6d6448172b09d1a5a9d4af2f99cd6afc6e))
+
 ## [1.0.1](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.0.0...v1.0.1) (2025-04-07)
 
 
