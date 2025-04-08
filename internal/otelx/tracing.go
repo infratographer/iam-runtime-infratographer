@@ -1,66 +1,28 @@
 package otelx
 
 import (
-	"context"
-	"net/url"
-	"time"
+	"encoding/json"
+	"fmt"
 
-	"go.infratographer.com/x/versionx"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.infratographer.com/x/otelx"
+	"go.uber.org/zap"
 )
-
-const (
-	timeout = 10 * time.Second
-)
-
-func initializeExporter(config Config) (trace.SpanExporter, error) {
-	_, err := url.Parse(config.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	exporterOpts := []otlptracegrpc.Option{
-		otlptracegrpc.WithEndpoint(config.URL),
-		otlptracegrpc.WithTimeout(timeout),
-	}
-
-	if config.Insecure {
-		exporterOpts = append(exporterOpts, otlptracegrpc.WithInsecure())
-	}
-
-	return otlptrace.New(context.Background(), otlptracegrpc.NewClient(exporterOpts...))
-}
 
 // Initialize sets up OpenTelemetry instrumentation.
 func Initialize(config Config, appName string) error {
-	appDetails := versionx.BuildDetails()
-	providerOpts := []trace.TracerProviderOption{
-		trace.WithSampler(trace.AlwaysSample()),
-		trace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(appName),
-			semconv.ServiceVersionKey.String(appDetails.Version),
-		)),
+	otelConfig := otelx.Config{
+		Enabled:     config.Enabled,
+		Provider:    otelx.ExporterOTLPGRPC,
+		Environment: config.Environment,
+		SampleRatio: config.SampleRatio,
+		OTLP: otelx.OTLPConfig{
+			Endpoint: config.URL,
+			Insecure: config.Insecure,
+		},
 	}
 
-	if config.Enabled {
-		exporter, err := initializeExporter(config)
-		if err != nil {
-			return err
-		}
+	b, _ := json.MarshalIndent(otelConfig, "", "  ")
+	fmt.Println(string(b))
 
-		providerOpts = append(providerOpts, trace.WithBatcher(exporter))
-	}
-
-	tp := trace.NewTracerProvider(providerOpts...)
-	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-
-	return nil
+	return otelx.InitTracer(otelConfig, appName, zap.NewNop().Sugar())
 }
