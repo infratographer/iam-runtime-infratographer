@@ -1,13 +1,5 @@
 # Changelog
 
-## [1.1.1](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.0...v1.1.1) (2025-04-10)
-
-
-### Bug Fixes
-
-* **deps:** update module github.com/nats-io/nats.go to v1.41.1 ([#131](https://github.com/infratographer/iam-runtime-infratographer/issues/131)) ([9e228bb](https://github.com/infratographer/iam-runtime-infratographer/commit/9e228bb533a3d6b8f270329d0b5912a59594b1f9))
-* remove debug print line ([#139](https://github.com/infratographer/iam-runtime-infratographer/issues/139)) ([24a8cab](https://github.com/infratographer/iam-runtime-infratographer/commit/24a8cab0b0e319ff0fb7b57ea010b2465a1acf5d))
-
 ## [1.1.0](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.0.1...v1.1.0) (2025-04-08)
 
 
