@@ -1,9 +1,6 @@
 package otelx
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"go.infratographer.com/x/otelx"
 	"go.uber.org/zap"
 )
@@ -20,9 +17,6 @@ func Initialize(config Config, appName string) error {
 			Insecure: config.Insecure,
 		},
 	}
-
-	b, _ := json.MarshalIndent(otelConfig, "", "  ")
-	fmt.Println(string(b))
 
 	return otelx.InitTracer(otelConfig, appName, zap.NewNop().Sugar())
 }
