@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.1...v1.1.2) (2025-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update infratographer/x with fix for otelx ([#143](https://github.com/infratographer/iam-runtime-infratographer/issues/143)) ([4760d43](https://github.com/infratographer/iam-runtime-infratographer/commit/4760d43890db610eba91a4b17f16b4944756a43e))
+
 ## [1.1.1](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.0...v1.1.1) (2025-04-10)
 
 
