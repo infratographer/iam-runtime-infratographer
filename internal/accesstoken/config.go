@@ -2,7 +2,6 @@ package accesstoken
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"net/url"
 	"time"
@@ -121,6 +120,9 @@ type ExchangeConfig struct {
 
 	// TokenType configures the token type (default: urn:ietf:params:oauth:token-type:jwt)
 	TokenType string
+
+	// Scopes configures the scopes for the exchanged token.
+	Scopes []string
 }
 
 func (c ExchangeConfig) configured() bool {
@@ -179,9 +181,10 @@ func AddFlags(flags *pflag.FlagSet) {
 	flags.String("accessTokenProvider.source.clientCredentials.clientID", "", "clientID is the client credentials id which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-id`")
 	flags.String("accessTokenProvider.source.clientCredentials.clientSecret", "", "clientSecret is the client credentials secret which is used to retrieve a token from the issuer. This attribute also supports a file path by prefixing the value with `file://`. example: `file:///var/secrets/client-secret`")
 
-	flag.String("accessTokenProvider.exchange.issuer", "", "issuer specifies the URL for the issuer for the exchanged token. The Issuer must support OpenID discovery to discover the token endpoint")
-	flag.String("accessTokenProvider.exchange.grantType", "urn:ietf:params:oauth:grant-type:token-exchange", "grantType configures the grant type")
-	flag.String("accessTokenProvider.exchange.tokenType", "", "tokenType configures the token type")
+	flags.String("accessTokenProvider.exchange.issuer", "", "issuer specifies the URL for the issuer for the exchanged token. The Issuer must support OpenID discovery to discover the token endpoint")
+	flags.String("accessTokenProvider.exchange.grantType", "urn:ietf:params:oauth:grant-type:token-exchange", "grantType configures the grant type")
+	flags.String("accessTokenProvider.exchange.tokenType", "", "tokenType configures the token type")
+	flags.StringSlice("accessTokenProvider.exchange.scopes", []string{}, "scopes configures the scopes for the exchanged token")
 
-	flag.Duration("accessTokenProvider.expiryDelta", 10*time.Second, "sets the early expiry validation for the token") //nolint:mnd
+	flags.Duration("accessTokenProvider.expiryDelta", 10*time.Second, "sets the early expiry validation for the token") //nolint:mnd
 }

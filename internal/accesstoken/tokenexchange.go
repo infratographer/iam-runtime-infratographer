@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -44,11 +45,20 @@ func (s *exchangeTokenSource) Token() (*oauth2.Token, error) {
 		return nil, fmt.Errorf("%w: %w", ErrUpstreamTokenRequestFailed, err)
 	}
 
-	token, err := s.exchangeConfig.Exchange(s.ctx, "",
+	opts := []oauth2.AuthCodeOption{
 		oauth2.SetAuthURLParam("grant_type", s.cfg.GrantType),
 		oauth2.SetAuthURLParam("subject_token", upstreamToken.AccessToken),
 		oauth2.SetAuthURLParam("subject_token_type", s.cfg.TokenType),
-	)
+	}
+
+	if len(s.cfg.Scopes) > 0 {
+		opts = append(opts, oauth2.SetAuthURLParam(
+			"scope",
+			strings.Join(s.cfg.Scopes, " "),
+		))
+	}
+
+	token, err := s.exchangeConfig.Exchange(s.ctx, "", opts...)
 	if err != nil {
 		if rErr, ok := err.(*oauth2.RetrieveError); ok {
 			if rErr.Response.StatusCode == http.StatusBadRequest {
