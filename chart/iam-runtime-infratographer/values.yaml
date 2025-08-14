@@ -106,6 +106,9 @@ config:
       # -- tokenType configures the token type
       # @default -- urn:ietf:params:oauth:token-type:jwt
       tokenType: ""
+      # -- scopes configures the scopes on an exchange request
+      # @default -- []
+      scopes: []
 
 # -- restartPolicy set to Always if using with initContainers on kube 1.29 and up
 # with the SideContainer feature flag enabled.
