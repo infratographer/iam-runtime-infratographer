@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.2...v1.2.0) (2025-08-14)
+
+
+### Features
+
+* Add scope token exchange ([#165](https://github.com/infratographer/iam-runtime-infratographer/issues/165)) ([b6a3b5a](https://github.com/infratographer/iam-runtime-infratographer/commit/b6a3b5aa75a518753398c0212615e5ab0698c773))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/go-jose/go-jose/v4 to v4.1.2 ([#163](https://github.com/infratographer/iam-runtime-infratographer/issues/163)) ([fb7414c](https://github.com/infratographer/iam-runtime-infratographer/commit/fb7414c9039e0c630d5a159a5c5f707ddbd1433a))
+* **deps:** update module github.com/micahparks/keyfunc/v3 to v3.6.1 ([#148](https://github.com/infratographer/iam-runtime-infratographer/issues/148)) ([ccee139](https://github.com/infratographer/iam-runtime-infratographer/commit/ccee139cee815bf8804c25332dd2c95212c934cd))
+* **deps:** update module github.com/nats-io/nats.go to v1.44.0 ([#149](https://github.com/infratographer/iam-runtime-infratographer/issues/149)) ([a49554c](https://github.com/infratographer/iam-runtime-infratographer/commit/a49554cef945db102f526d661f934eedc096dccd))
+* **deps:** update module google.golang.org/grpc to v1.74.2 ([#151](https://github.com/infratographer/iam-runtime-infratographer/issues/151)) ([5bb6e56](https://github.com/infratographer/iam-runtime-infratographer/commit/5bb6e56d337950bdcc15464fdc18466a94dd9257))
+
 ## [1.1.2](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.1...v1.1.2) (2025-04-11)
 
 
