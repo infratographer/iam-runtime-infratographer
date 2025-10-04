@@ -15,7 +15,7 @@ require (
 	github.com/metal-toolbox/iam-runtime v0.4.1
 	github.com/nats-io/nats.go v1.44.0
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.11.1
 	go.infratographer.com/x v0.9.2
