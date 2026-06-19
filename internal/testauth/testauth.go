@@ -3,6 +3,7 @@
 package testauth
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"errors"
@@ -51,7 +52,9 @@ func (s *Server) Start() {
 		e.GET("/.well-known/openid-configuration", s.handleOIDC)
 		e.GET("/.well-known/jwks.json", s.handleJWKS)
 
-		listener, err := net.Listen("tcp", ":0")
+		lisCfg := &net.ListenConfig{}
+
+		listener, err := lisCfg.Listen(context.Background(), "tcp", ":0")
 
 		require.NoError(s.t, err)
 
