@@ -92,7 +92,8 @@ func newExchangeTokenSource(ctx context.Context, cfg ExchangeConfig, upstream oa
 		upstream: upstream,
 		exchangeConfig: oauth2.Config{
 			Endpoint: oauth2.Endpoint{
-				TokenURL: tokenEndpoint,
+				TokenURL:  tokenEndpoint,
+				AuthStyle: oauth2.AuthStyleInParams,
 			},
 		},
 	}, nil
