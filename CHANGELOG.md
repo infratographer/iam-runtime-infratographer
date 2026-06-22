@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.1](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.2.0...v1.2.1) (2026-06-22)
+
+
+### Bug Fixes
+
+* **auth:** add AuthStyleInParams to prevent empty Authorization header during token exchange ([#198](https://github.com/infratographer/iam-runtime-infratographer/issues/198)) ([20e47b3](https://github.com/infratographer/iam-runtime-infratographer/commit/20e47b3160e4c2109d34f903f7dfdcc61d05db9f))
+* **deps:** update go opentelemetry packages and libraries ([#171](https://github.com/infratographer/iam-runtime-infratographer/issues/171)) ([c4ef967](https://github.com/infratographer/iam-runtime-infratographer/commit/c4ef967f728a8266edef718715a4665565e6ec1c))
+* **deps:** update module github.com/go-jose/go-jose/v4 to v4.1.3 ([#176](https://github.com/infratographer/iam-runtime-infratographer/issues/176)) ([a815350](https://github.com/infratographer/iam-runtime-infratographer/commit/a815350657f6c3e85edb6c4a57de5f9955a5dd21))
+* **deps:** update module github.com/hashicorp/go-retryablehttp to v0.7.8 ([#166](https://github.com/infratographer/iam-runtime-infratographer/issues/166)) ([d249446](https://github.com/infratographer/iam-runtime-infratographer/commit/d249446c695e395c307f446fff9daf67501d6369))
+* **deps:** update module github.com/micahparks/jwkset to v0.11.0 ([#168](https://github.com/infratographer/iam-runtime-infratographer/issues/168)) ([6fd2aa7](https://github.com/infratographer/iam-runtime-infratographer/commit/6fd2aa75a8a3fc359f881c377807acec5815b0e5))
+* **deps:** update module google.golang.org/protobuf to v1.36.10 ([#169](https://github.com/infratographer/iam-runtime-infratographer/issues/169)) ([8d63107](https://github.com/infratographer/iam-runtime-infratographer/commit/8d6310799e79ff2466bfc7d715a020f95c6bbb2b))
+* update dependencies ([#197](https://github.com/infratographer/iam-runtime-infratographer/issues/197)) ([7d90317](https://github.com/infratographer/iam-runtime-infratographer/commit/7d903170adfc3e001d286bedf11e5dbafc5de250))
+
 ## [1.2.0](https://github.com/infratographer/iam-runtime-infratographer/compare/v1.1.2...v1.2.0) (2025-08-14)
 
 
