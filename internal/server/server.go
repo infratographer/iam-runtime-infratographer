@@ -112,7 +112,9 @@ func (s *server) listenAndServe(errCh chan<- error) error {
 		}
 	}
 
-	listener, err := net.Listen("unix", s.socketPath)
+	lisCfg := &net.ListenConfig{}
+
+	listener, err := lisCfg.Listen(context.Background(), "unix", s.socketPath)
 	if err != nil {
 		s.logger.Errorw("failed to listen on socket", "error", err)
 
@@ -136,7 +138,9 @@ func (s *server) listenAndServeHealth(errCh chan<- error) error {
 	healthSrv := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
 	health.RegisterHealthServer(healthSrv, s)
 
-	listener, err := net.Listen("tcp", s.healthAddress)
+	lisCfg := &net.ListenConfig{}
+
+	listener, err := lisCfg.Listen(context.Background(), "tcp", s.healthAddress)
 	if err != nil {
 		s.logger.Errorw("failed to listen on health address", "error", err)
 
